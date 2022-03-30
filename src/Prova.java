@@ -6,38 +6,36 @@ public class Prova {
 
   public static void main(String[] args) {
 
-    int M = 2;           // Emittenti
-    int K = 2;            // Fasce orarie
-    int S = 30;        // Copertura giornaliera di spettatori
-    double omega = 0.01;  // Percentuale di budget minimo per fascia sul totale
+    int M = 2;                  // Emittenti
+    int K = 2;                  // Fasce orarie
+    int S = 30;                 // Copertura giornaliera di spettatori
+    double omega = 0.01;        // Percentuale di budget minimo per fascia sul totale
     int[] beta = {75, 35};      // Budget massimo per ogni emittente per ogni singola fascia
 
     int[][] tau = { {10, 10},
-                    {10, 10} };    // Minuti massimi divisi per emittente e per fascia
+                    {10, 10} }; // Minuti massimi divisi per emittente e per fascia
 
     int[][] C = { {63, 72},
-                  {32, 34} };        // Costo al minuto per emittente e per fascia
+                  {32, 34} };   // Costo al minuto per emittente e per fascia
 
     int[][] P = { {11, 10},
-                  { 5,  7} };        // Spettatori al minuto per emittente e per fascia
+                  { 5,  7} };   // Spettatori al minuto per emittente e per fascia
 
-    int[] produzione = {10, 15, 25, 5};
-    int[] domanda = {8, 25, 18};
-    double[][] costi = { {11, 5, 10, 7},
-                         {.42, 0, 0, 0},
-                         {0 , .4571, 0, 0},
-                         {0, 0, .48, 0},
-                         {0, 0, 0, 17/35.},
-                         {63, 0, 0, 0},
-                         {0, 32, 0, 0},
-                         {0, 0, 72, 0},
-                         {0, 0, 0 , 34},
-                         {1, 0, 0, 0},
-                         {0, 1, 0, 0},
-                         {0, 0, 1, 0},
-                         {0, 0, 0, 1} };
+    double[][] costi = { {11,          5,     10,      7},
+                         {21/50.,      0,      0,      0},
+                         {0,      16/35.,      0,      0},
+                         {0,           0, 12/25.,      0},
+                         {0,           0,      0, 17/35.},
+                         {63,          0,      0,      0},
+                         {0,          32,      0,      0},
+                         {0,           0,     72,      0},
+                         {0,           0,      0,     34},
+                         {1,           0,      0,      0},
+                         {0,           1,      0,      0},
+                         {0,           0,      1,      0},
+                         {0,           0,      0,      1} };
 
-    double vincoli[] = {30, 1/50., 1/50., 1/50., 1/50., 75, 35, 75, 35, 10, 10, 10, 10};
+    double[] vincoli = {30, 1/50., 1/50., 1/50., 1/50., 75, 35, 75, 35, 10, 10, 10, 10};
 
     try
     {
