@@ -2,6 +2,7 @@
   <library name="gurobi">
     <CLASSES>
       <root url="jar:///Library/gurobi951/macos_universal2/lib/gurobi.jar!/" />
+      <root url="jar:///opt/gurobi951/linux64/lib/gurobi.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
