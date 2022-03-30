@@ -85,8 +85,8 @@ public class Prova {
 
   private static GRBVar[][] aggiungiVariabili(GRBModel model, int[][] tau, int[][] C, int K) throws GRBException {
 
-    int righe = (C.length*K*3) + 1;
-    int colonne = tau.length*K;
+    int righe = C.length;
+    int colonne = C[0].length;
 
     GRBVar[][] xij = new GRBVar[righe][colonne];
 
@@ -150,54 +150,6 @@ public class Prova {
     model.setObjective(obj);
     model.set(GRB.IntAttr.ModelSense, GRB.MINIMIZE);
   }
-
-  /*private static void aggiungiVincoliProduzione(GRBModel model, GRBVar[][] xij, GRBVar[] s, GRBVar [] y, int[] produzione) throws GRBException {
-    for (int i = 0; i < produzione.length; i++) {
-        GRBLinExpr expr = new GRBLinExpr();
-
-        for (int j = 0; j < xij[0].length; j++) {
-          expr.addTerm(1, xij[i][j]);
-        }
-
-      //se voglio risolvere la forma standard
-      //expr.addTerm(1.0, s[i]);
-
-      //se voglio risolvere il problema artificiale della I fase
-      //expr.addTerm(1.0, y[i]);
-
-      //vincolo forma standard
-      //model.addConstr(expr, GRB.EQUAL, produzione[i], "vincolo_produzione_i_"+i);
-
-      //vincolo no forma standard
-      model.addConstr(expr, GRB.LESS_EQUAL, produzione[i], "vincolo_produzione_i_"+i);
-
-    }
-  }
-
-  private static void aggiungiVincoliDomanda(GRBModel model, GRBVar[][] xij, GRBVar[] s, GRBVar [] y, int [] produzione, int[] domanda) throws GRBException
-  {
-    for (int j = 0; j < domanda.length; j++)
-    {
-      GRBLinExpr expr = new GRBLinExpr();
-
-      for (int i = 0; i < xij.length; i++)
-      {
-        expr.addTerm(1, xij[i][j]);
-      }
-
-      //se voglio risolvere la forma standard
-      //expr.addTerm(-1.0, s[produzione.length + j]);
-
-      //se voglio risolvere il problema artificale della I fase
-      //expr.addTerm(1.0, y[produzione.length + j]);
-
-      //vincolo forma standard
-      //model.addConstr(expr, GRB.EQUAL, domanda[j], "vincolo_domanda_j_"+j);
-
-      //vincolo no forma standard
-      model.addConstr(expr, GRB.GREATER_EQUAL, domanda[j], "vincolo_domanda_j_"+j);
-    }
-  }*/
 
   private static void aggiungiVincoli(GRBModel model, GRBVar[][] xij, double[][] costi, GRBVar[] y, int[][] C, int[][] tau, int K, double[] vincoli) throws GRBException  {
 
