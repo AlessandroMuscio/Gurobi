@@ -1,7 +1,6 @@
 import gurobi.GRB;
 import gurobi.GRB.DoubleAttr;
 import gurobi.GRB.StringAttr;
-import gurobi.GRBConstr;
 import gurobi.GRBEnv;
 import gurobi.GRBException;
 import gurobi.GRBLinExpr;
@@ -10,6 +9,7 @@ import gurobi.GRBVar;
 
 public class ProblemaDelTrasporto2_0
 {
+
     public static void main(String[] args)
     {
         int[] produzione = {10, 15, 25, 5};
