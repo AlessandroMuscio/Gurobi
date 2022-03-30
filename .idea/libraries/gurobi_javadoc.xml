@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="gurobi-javadoc">
+    <CLASSES />
+    <JAVADOC>
+      <root url="jar:///Library/gurobi951/macos_universal2/lib/gurobi-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES />
+  </library>
+</component>
