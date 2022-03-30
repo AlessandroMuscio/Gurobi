@@ -162,7 +162,7 @@ public class Prova {
       //se voglio risolvere la forma standard
       //expr.addTerm(1.0, s[i]);
 
-      //se voglio risolvere il problema artificale della I fase
+      //se voglio risolvere il problema artificiale della I fase
       //expr.addTerm(1.0, y[i]);
 
       //vincolo forma standard
