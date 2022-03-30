@@ -1,58 +1,41 @@
-import gurobi.GRB;
+import gurobi.*;
 import gurobi.GRB.DoubleAttr;
 import gurobi.GRB.StringAttr;
-import gurobi.GRBConstr;
-import gurobi.GRBEnv;
-import gurobi.GRBException;
-import gurobi.GRBLinExpr;
-import gurobi.GRBModel;
-import gurobi.GRBVar;
-public class App {
+
+public class Prova {
 
   public static void main(String[] args) {
 
-    int M = 10;           // Emittenti
-    int K = 8;            // Fasce orarie
-    int S = 84070;        // Copertura giornaliera di spettatori
-    double omega = 0.02;  // Percentuale di budget minimo per fascia sul totale
-    int[] beta = {3176, 2804, 3011, 3486, 2606, 2887, 3132, 3211, 3033, 2721};      // Budget massimo per ogni emittente per ogni singola fascia
+    int M = 2;           // Emittenti
+    int K = 2;            // Fasce orarie
+    int S = 30;        // Copertura giornaliera di spettatori
+    double omega = 0.01;  // Percentuale di budget minimo per fascia sul totale
+    int[] beta = {75, 35};      // Budget massimo per ogni emittente per ogni singola fascia
 
-    int[][] tau = { {3, 1, 1, 2, 2, 2, 2, 2},
-                    {2, 2, 2, 2, 1, 1, 2, 3},
-                    {1, 2, 2, 3, 1, 2, 2, 1},
-                    {2, 2, 1, 1, 2, 1, 1, 1},
-                    {2, 2, 3, 2, 1, 1, 3, 3},
-                    {2, 2, 2, 3, 3, 1, 2, 2},
-                    {2, 2, 2, 3, 2, 1, 3, 1},
-                    {3, 3, 3, 2, 1, 3, 1, 3},
-                    {2, 2, 2, 2, 1, 1, 3, 2},
-                    {1, 2, 2, 2, 3, 2, 1, 1} };    // Minuti massimi divisi per emittente e per fascia
+    int[][] tau = { {10, 10},
+                    {10, 10} };    // Minuti massimi divisi per emittente e per fascia
 
-    int[][] C = { {1146,  950, 1354, 1385, 1301, 1363, 1112, 1151},
-                  {1026, 1293, 1107,  935, 1259, 1229, 1097, 1176},
-                  { 935, 1383, 1387, 1021, 1359,  919,  900, 1021},
-                  {1153, 1129,  994, 1133, 1099, 1372, 1055, 1003},
-                  {1376, 1096, 1356, 1139, 1061, 1007, 1095, 1094},
-                  { 957, 1248, 1055, 1332, 1336, 1100,  996, 1332},
-                  { 928, 1045, 1237,  908, 1036, 1368,  903, 1379},
-                  {1372,  919, 1394, 1268, 1010, 1352, 1088, 1343},
-                  {1185,  906, 1113, 1119,  923, 1335, 1075, 1284},
-                  {1269, 1089, 1198, 1008, 1016, 1289, 1373, 1105} };        // Costo al minuto per emittente e per fascia
+    int[][] C = { {63, 72},
+                  {32, 34} };        // Costo al minuto per emittente e per fascia
 
-    int[][] P = { { 553, 3444, 1098, 2171, 2145, 1429, 1932,  611},
-                  { 944,  998, 2601,  495,  431, 1807, 1334, 2080},
-                  {2674,  666, 3239,  583,  902, 2109, 1226, 1187},
-                  {1384,  905, 1206, 2178, 2571, 2573, 3380, 2904},
-                  {1333, 1114,  663, 1196, 1247, 3264, 3006, 2705},
-                  {1342, 3414, 1399, 2325, 1791, 3362, 3359, 1078},
-                  {1195, 3143, 2001, 3489, 2882, 2853,  527, 1682},
-                  {1930, 2842, 2184, 3205, 1968, 1955, 1607,  648},
-                  {3128, 1174, 3179, 2326, 2529,  313, 1210, 2380},
-                  { 521, 1357, 1848,  876, 2090, 2752, 1386, 2122} };        // Spettatori al minuto per emittente e per fascia
+    int[][] P = { {11, 10},
+                  { 5,  7} };        // Spettatori al minuto per emittente e per fascia
 
     int[] produzione = {10, 15, 25, 5};
     int[] domanda = {8, 25, 18};
-    int[][] costi = {{10, 5, 15}, {12, 10, 13}, {15, 13, 13}, {10, 5, 5}};
+    double[][] costi = { {11, 5, 10, 7},
+                         {.42, 0, 0, 0},
+                         {0 , .4571, 0, 0},
+            {0 ,       	0 ,    .48   	  	,	 	0      },
+            {0 ,       	0 ,       	0  , 17/35.},
+            {63,        	0,        	0 ,       	0},
+            {0 ,       	32,        	0 ,       	0 },
+            {0 ,       	0 ,       	72 ,       	0 },
+            {0 ,       	0 ,       	0  ,      	34},
+            {1 ,       	0 ,       	0  ,      	0 },
+            {0 ,       	1 ,       	0  ,      	0},
+            {0 ,       	0 ,       	1  ,      	0},
+            {0 ,       	0 ,       	0  ,      	1}};
 
     try
     {
@@ -61,15 +44,15 @@ public class App {
 
       GRBModel model = new GRBModel(env);
 
-      GRBVar[][] xij = aggiungiVariabili(model, produzione, domanda);
+      GRBVar[][] xij = aggiungiVariabili(model, tau, C, K);
 
       //variabili per far risolvere a Gurobi direttamente la forma standard del problema
-      GRBVar[] s = aggiungiVariabiliSlackSurplus(model, produzione, domanda);
+      GRBVar[] s = aggiungiVariabiliSlackSurplus(model, C, K);
 
       //variabili per far risolvere a Gurobi il problema artificiale della I fase
-      GRBVar[] y = aggiungiVariabiliAusiliarie(model, produzione, domanda);
+      GRBVar[] y = aggiungiVariabiliAusiliarie(model, C, K);
 
-      aggiungiFunzioneObiettivo(model, xij, costi, y, produzione, domanda);
+      aggiungiFunzioneObiettivo(model, xij, costi, y, C, tau, K);
 
       aggiungiVincoliProduzione(model, xij, s, y, produzione);
 
@@ -96,12 +79,15 @@ public class App {
     env.set(GRB.IntParam.Presolve, 0);
   }
 
-  private static GRBVar[][] aggiungiVariabili(GRBModel model, int[] produzione, int[] domanda) throws GRBException {
+  private static GRBVar[][] aggiungiVariabili(GRBModel model, int[][] tau, int[][] C, int K) throws GRBException {
 
-    GRBVar[][] xij = new GRBVar[produzione.length][domanda.length];
+    int righe = (C.length*K*3) + 1;
+    int colonne = tau.length*K;
 
-    for (int i = 0; i < produzione.length; i++) {
-      for (int j = 0; j < domanda.length; j++) {
+    GRBVar[][] xij = new GRBVar[righe][colonne];
+
+    for (int i = 0; i < righe; i++) {
+      for (int j = 0; j < colonne; j++) {
         xij[i][j] = model.addVar(0, GRB.INFINITY, 0, GRB.CONTINUOUS, "xij_"+i+"_"+j);
       }
     }
@@ -109,11 +95,13 @@ public class App {
   }
 
 
-  private static GRBVar[] aggiungiVariabiliSlackSurplus(GRBModel model, int[] produzione, int[] domanda) throws GRBException
-  {
-    GRBVar[] s = new GRBVar[produzione.length + domanda.length];
+  private static GRBVar[] aggiungiVariabiliSlackSurplus(GRBModel model, int[][] C, int K) throws GRBException {
 
-    for(int i = 0; i < produzione.length + domanda.length; i++) {
+    int lunghezza = (C.length*K*3) + 1;
+
+    GRBVar[] s = new GRBVar[lunghezza];
+
+    for(int i = 0; i < lunghezza; i++) {
       s[i] = model.addVar(0, GRB.INFINITY, 0, GRB.CONTINUOUS, "s_" + i);
     }
 
@@ -122,29 +110,35 @@ public class App {
 
 
 
-  private static GRBVar[] aggiungiVariabiliAusiliarie(GRBModel model, int[] produzione, int[] domanda) throws GRBException
-  {
-    GRBVar[] s = new GRBVar[produzione.length + domanda.length];
+  private static GRBVar[] aggiungiVariabiliAusiliarie(GRBModel model, int[][] C, int K) throws GRBException {
 
-    for(int i = 0; i < produzione.length + domanda.length; i++) {
-      s[i] = model.addVar(0, GRB.INFINITY, 0, GRB.CONTINUOUS, "s_" + i);
+    int lunghezza = (C.length*K) + 1;
+
+    GRBVar[] y = new GRBVar[lunghezza];
+
+    for(int i = 0; i < lunghezza; i++) {
+      y[i] = model.addVar(0, GRB.INFINITY, 0, GRB.CONTINUOUS, "y_" + i);
     }
 
-    return s;
+    return y;
   }
 
 
-  private static void aggiungiFunzioneObiettivo(GRBModel model, GRBVar[][] xij, int[][] costi, GRBVar[] y, int[] produzione, int[] domanda) throws GRBException
-  {
+  private static void aggiungiFunzioneObiettivo(GRBModel model, GRBVar[][] xij, double[][] costi, GRBVar[] y, int[][] C, int[][] tau, int K) throws GRBException {
+
+    int lunghezza = (C.length*K) + 1;
+    int righe = (C.length*K*3) + 1;
+    int colonne = tau.length*K;
+
     GRBLinExpr obj = new GRBLinExpr();
 
     //funzione obiettivo del problema artificiale
-//		for(int i = 0; i < produzione.length + domanda.length; i++) {
-//			obj.addTerm(1.0, y[i]);
-//		}
+		for(int i = 0; i < lunghezza; i++) {
+          obj.addTerm(1.0, y[i]);
+        }
 
-    for(int i = 0; i < produzione.length; i++) {
-      for(int j = 0; j < domanda.length; j++) {
+    for(int i = 0; i < righe; i++) {
+      for(int j = 0; j < colonne; j++) {
         obj.addTerm(costi[i][j], xij[i][j]);
       }
     }
