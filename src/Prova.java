@@ -26,16 +26,18 @@ public class Prova {
     double[][] costi = { {11, 5, 10, 7},
                          {.42, 0, 0, 0},
                          {0 , .4571, 0, 0},
-            {0 ,       	0 ,    .48   	  	,	 	0      },
-            {0 ,       	0 ,       	0  , 17/35.},
-            {63,        	0,        	0 ,       	0},
-            {0 ,       	32,        	0 ,       	0 },
-            {0 ,       	0 ,       	72 ,       	0 },
-            {0 ,       	0 ,       	0  ,      	34},
-            {1 ,       	0 ,       	0  ,      	0 },
-            {0 ,       	1 ,       	0  ,      	0},
-            {0 ,       	0 ,       	1  ,      	0},
-            {0 ,       	0 ,       	0  ,      	1}};
+                         {0, 0, .48, 0},
+                         {0, 0, 0, 17/35.},
+                         {63, 0, 0, 0},
+                         {0, 32, 0, 0},
+                         {0, 0, 72, 0},
+                         {0, 0, 0 , 34},
+                         {1, 0, 0, 0},
+                         {0, 1, 0, 0},
+                         {0, 0, 1, 0},
+                         {0, 0, 0, 1} };
+
+    double vincoli[] = {30, 1/50., 1/50., 1/50., 1/50., 75, 35, 75, 35, 10, 10, 10, 10};
 
     try
     {
@@ -54,9 +56,11 @@ public class Prova {
 
       aggiungiFunzioneObiettivo(model, xij, costi, y, C, tau, K);
 
-      aggiungiVincoliProduzione(model, xij, s, y, produzione);
+      aggiungiVincoli(model, xij, costi, y, C, tau, K, vincoli);
 
-      aggiungiVincoliDomanda(model, xij, s, y, produzione, domanda);
+      //aggiungiVincoliProduzione(model, xij, s, y, produzione);
+
+      //aggiungiVincoliDomanda(model, xij, s, y, produzione, domanda);
 
       //model.addConstr(xij[0][1], GRB.GREATER_EQUAL, 1, "vincolo_aggiuntivo");
       /*
@@ -126,9 +130,9 @@ public class Prova {
 
   private static void aggiungiFunzioneObiettivo(GRBModel model, GRBVar[][] xij, double[][] costi, GRBVar[] y, int[][] C, int[][] tau, int K) throws GRBException {
 
-    int lunghezza = (C.length*K) + 1;
-    int righe = (C.length*K*3) + 1;
-    int colonne = tau.length*K;
+    int lunghezza = (C.length*C[0].length) + 1;
+    //int righe = (C.length*K*3) + 1;
+    //int colonne = tau.length*K;
 
     GRBLinExpr obj = new GRBLinExpr();
 
@@ -137,27 +141,23 @@ public class Prova {
           obj.addTerm(1.0, y[i]);
         }
 
-    for(int i = 0; i < righe; i++) {
+    /*for(int i = 0; i < righe; i++) {
       for(int j = 0; j < colonne; j++) {
         obj.addTerm(costi[i][j], xij[i][j]);
       }
-    }
-
+    }*/
 
     model.setObjective(obj);
     model.set(GRB.IntAttr.ModelSense, GRB.MINIMIZE);
   }
 
-  private static void aggiungiVincoliProduzione(GRBModel model, GRBVar[][] xij, GRBVar[] s, GRBVar [] y, int[] produzione) throws GRBException
-  {
-    for (int i = 0; i < produzione.length; i++)
-    {
-      GRBLinExpr expr = new GRBLinExpr();
+  /*private static void aggiungiVincoliProduzione(GRBModel model, GRBVar[][] xij, GRBVar[] s, GRBVar [] y, int[] produzione) throws GRBException {
+    for (int i = 0; i < produzione.length; i++) {
+        GRBLinExpr expr = new GRBLinExpr();
 
-      for (int j = 0; j < xij[0].length; j++)
-      {
-        expr.addTerm(1, xij[i][j]);
-      }
+        for (int j = 0; j < xij[0].length; j++) {
+          expr.addTerm(1, xij[i][j]);
+        }
 
       //se voglio risolvere la forma standard
       //expr.addTerm(1.0, s[i]);
@@ -191,11 +191,38 @@ public class Prova {
       //se voglio risolvere il problema artificale della I fase
       //expr.addTerm(1.0, y[produzione.length + j]);
 
-      //vincolo no forma standard
+      //vincolo forma standard
       //model.addConstr(expr, GRB.EQUAL, domanda[j], "vincolo_domanda_j_"+j);
 
       //vincolo no forma standard
       model.addConstr(expr, GRB.GREATER_EQUAL, domanda[j], "vincolo_domanda_j_"+j);
+    }
+  }*/
+
+  private static void aggiungiVincoli(GRBModel model, GRBVar[][] xij, double[][] costi, GRBVar[] y, int[][] C, int[][] tau, int K, double[] vincoli) throws GRBException  {
+
+    int righe = (C.length*C[0].length*3) + 1;
+    int colonne = tau.length*K;
+
+    for (int i = 0; i < righe; i++) {
+
+      GRBLinExpr expr = new GRBLinExpr();
+
+      for (int j = 0; j < colonne; j++) {
+        expr.addTerm(costi[i][j], xij[i][j]);
+      }
+
+      //se voglio risolvere la forma standard
+      //expr.addTerm(-1.0, s[produzione.length + j]);
+
+      //se voglio risolvere il problema artificale della I fase
+      //expr.addTerm(1.0, y[produzione.length + j]);
+
+      //vincolo forma standard
+      //model.addConstr(expr, GRB.EQUAL, domanda[j], "vincolo_domanda_j_"+j);
+
+      //vincolo no forma standard
+      model.addConstr(expr, GRB.LESS_EQUAL, vincoli[i], "vincolo"+i);
     }
   }
 
@@ -204,12 +231,23 @@ public class Prova {
     model.optimize();
 
     int status = model.get(GRB.IntAttr.Status);
+    GRBLinExpr obj = (GRBLinExpr) model.getObjective();
 
     System.out.println("\n\n\nStato Ottimizzazione: "+ status + "\n");
     // 2 soluzione ottima trovata
     // 3 non esiste soluzione ammissibile (infeasible)
     // 5 soluzione illimitata
     // 9 tempo limite raggiunto
+
+    System.out.println("GRUPPO 81");
+    System.out.println("Componenti: muscio brignoli");
+
+    System.out.println("QUESITO 1:");
+    System.out.println("funzione obiettivo = " + obj.getValue());
+    System.out.println("copertura raggiunta totale (spettatori) = " );
+    System.out.println("tempo acquistato (minuti) = " );
+    System.out.println("budget inutilizzato = ");
+    System.out.println("soluzione di base ottima = ");
 
     /*TODO
      * Una volta risolto il problema artificale P^ associato alla I fase, come posso sapere

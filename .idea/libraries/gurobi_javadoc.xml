@@ -2,11 +2,7 @@
   <library name="gurobi-javadoc">
     <CLASSES />
     <JAVADOC>
-<<<<<<< HEAD
-      <root url="jar:///opt/gurobi951/linux64/lib/gurobi-javadoc.jar!/" />
-=======
-      <root url="jar:///Library/gurobi951/macos_universal2/lib/gurobi-javadoc.jar!/" />
->>>>>>> origin/main
+      <root url="jar://$PROJECT_DIR$/lib/gurobi-javadoc.jar!/" />
     </JAVADOC>
     <SOURCES />
   </library>

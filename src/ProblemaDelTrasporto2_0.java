@@ -131,7 +131,7 @@ public class ProblemaDelTrasporto2_0
             }
 
             //se voglio risolvere la forma standard
-            //expr.addTerm(1.0, s[i]);
+            expr.addTerm(1.0, s[i]);
 
             //se voglio risolvere il problema artificale della I fase
             //expr.addTerm(1.0, y[i]);
@@ -157,7 +157,7 @@ public class ProblemaDelTrasporto2_0
             }
 
             //se voglio risolvere la forma standard
-            //expr.addTerm(-1.0, s[produzione.length + j]);
+            expr.addTerm(-1.0, s[produzione.length + j]);
 
             //se voglio risolvere il problema artificale della I fase
             //expr.addTerm(1.0, y[produzione.length + j]);
