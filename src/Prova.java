@@ -5,7 +5,7 @@ import gurobi.GRB.StringAttr;
 public class Prova {
 
   public static void main(String[] args) {
-  /*PORCA MADONNA*/
+
     int M = 2;                  // Emittenti
     int K = 2;                  // Fasce orarie
     int S = 30;                 // Copertura giornaliera di spettatori
