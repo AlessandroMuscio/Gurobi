@@ -18,7 +18,7 @@ public class Provami {
     int[][] C = { {63, 72},
             {32, 34} };   // Costo al minuto per emittente e per fascia
 
-    int[][] P = { {18, 10},
+    int[][] P = { {11, 10},
             { 5,  7} };   // Spettatori al minuto per emittente e per fascia
 
     double[][] costi = { {11,          5,     10,      7},
@@ -44,7 +44,7 @@ public class Provami {
 
       GRBModel model = new GRBModel(env);
 
-      GRBVar[][] xij = aggiungiVariabili(model, C);
+      GRBVar[] xi = aggiungiVariabili(model, C);
 
       //variabili per far risolvere a Gurobi direttamente la forma standard del problema
       GRBVar[] s = aggiungiVariabiliSlackSurplus(model, C);
@@ -54,21 +54,25 @@ public class Provami {
 
       aggiungiFunzioneObiettivoAusiliaria(model, y, C);
 
-      aggiungiVincoliDiCopertura(model, xij, P, S, s, y);
-      aggiungiVincoliDiConcorrenza(model, xij, C, beta, omega, s, y);
-      aggiungiVincoliDiCosto(model, xij, C, beta, s, y);
-      aggiungiVincoliDiTempo(model, xij, tau, s, y);
+      aggiungiVincoliDiCopertura(model, xi, P, S, s, y);
+      aggiungiVincoliDiConcorrenza(model, xi, C, beta, omega, s, y);
+      aggiungiVincoliDiCosto(model, xi, C, beta, s, y);
+      aggiungiVincoliDiTempo(model, xi, tau, s, y);
 
       model.optimize();
+
+      model.write("model0.lp");
 
       rimuovi(model, y);
 
       model.set(GRB.IntAttr.NumObj, 0);
       model.update();
 
-      aggiungiFunzioneObiettivo(model, xij, P);
+      aggiungiFunzioneObiettivo(model, xi, P);
 
       model.optimize();
+
+      model.write("model1.lp");
 
       model.update();
 
@@ -146,7 +150,7 @@ public class Provami {
     }
   }
 
-  private static void aggiungiVincoliDiCopertura(GRBModel model, GRBVar[][] xij, int[][] P, int S, GRBVar[] s, GRBVar[] y) throws GRBException {
+  private static void aggiungiVincoliDiCopertura(GRBModel model, GRBVar[] xi, int[][] P, int S, GRBVar[] s, GRBVar[] y) throws GRBException {
 
     GRBLinExpr expr = new GRBLinExpr();
 
@@ -156,7 +160,7 @@ public class Provami {
 
         System.out.println(P[i][j]);
 
-        expr.addTerm(P[i][j], xij[i][j]);
+        expr.addTerm(P[i][j], xi[i]);
       }
     }
 
@@ -172,22 +176,19 @@ public class Provami {
     env.set(GRB.IntParam.Presolve, 0);
   }
 
-  private static GRBVar[][] aggiungiVariabili(GRBModel model, int[][] C) throws GRBException {
+  private static GRBVar[] aggiungiVariabili(GRBModel model, int[][] C) throws GRBException {
 
     int righe = C.length;
     int colonne = C[0].length;
 
-    GRBVar[][] xij = new GRBVar[righe][colonne];
+    GRBVar[] xi = new GRBVar[righe*colonne];
 
-    for (int i = 0; i < righe; i++) {
+    for (int i = 0; i < righe*colonne; i++) {
 
-      for (int j = 0; j < colonne; j++) {
-
-        xij[i][j] = model.addVar(0, GRB.INFINITY, 0, GRB.CONTINUOUS, "x"+i+""+j);
-      }
+        xi[i] = model.addVar(0, GRB.INFINITY, 0, GRB.CONTINUOUS, "x"+i);
     }
 
-    return xij;
+    return xi;
   }
 
   private static GRBVar[] aggiungiVariabiliSlackSurplus(GRBModel model, int[][] C) throws GRBException {
@@ -247,7 +248,7 @@ public class Provami {
         }
         else{
 
-          obj.addTerm(-P[i][j], xij[i][j]);
+          obj.addTerm(P[i][j], xij[i][j]);
         }
       }
     }
