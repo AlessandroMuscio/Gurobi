@@ -45,7 +45,7 @@ public class Provami {
 
       model.optimize();
 
-      rimuoviY(model, y);
+      rimuovi(model, y);
 
       model.set(GRB.IntAttr.NumObj, 0);
       model.update();
@@ -54,17 +54,19 @@ public class Provami {
 
       model.optimize();
 
-      risolvi(model);
+      model.update();
 
-    } catch (GRBException e)
-    {
+      stampa(model);
+
+    } catch (GRBException e) {
+
       e.printStackTrace();
     }
   }
 
-  private static void rimuoviY(GRBModel model, GRBVar[] y) throws GRBException {
+  private static void rimuovi(GRBModel model, GRBVar[] v) throws GRBException {
 
-    for(GRBVar i : y) {
+    for(GRBVar i : v) {
 
       model.remove(i);
     }
@@ -156,7 +158,7 @@ public class Provami {
 
     for (int i = 0; i < righe; i++) {
       for (int j = 0; j < colonne; j++) {
-        xij[i][j] = model.addVar(0, GRB.INFINITY, 0, GRB.CONTINUOUS, "xij_"+i+"_"+j);
+        xij[i][j] = model.addVar(0, GRB.INFINITY, 0, GRB.CONTINUOUS, "x"+i+"_"+j);
       }
     }
 
@@ -225,32 +227,38 @@ public class Provami {
     model.set(GRB.IntAttr.ModelSense, GRB.MINIMIZE);
   }
 
-  private static void risolvi(GRBModel model) throws GRBException
-  {
+  private static void stampa(GRBModel model) throws GRBException {
 
-    int status = model.get(GRB.IntAttr.Status);
     GRBLinExpr obj = (GRBLinExpr) model.getObjective();
 
-    System.out.println("\n\n\nStato Ottimizzazione: "+ status + "\n");
-    // 2 soluzione ottima trovata
-    // 3 non esiste soluzione ammissibile (infeasible)
-    // 5 soluzione illimitata
-    // 9 tempo limite raggiunto
-
-    System.out.println("GRUPPO 81");
+    System.out.println("\nGRUPPO 81");
     System.out.println("Componenti: muscio brignoli");
 
-    System.out.println("QUESITO 1:");
-    System.out.println("funzione obiettivo = " + obj.getValue());
+    System.out.println("\nQUESITO 1:");
+    System.out.println(String.format("funzione obiettivo = %.4f", obj.getValue()));
     System.out.println("copertura raggiunta totale (spettatori) = " );
     System.out.println("tempo acquistato (minuti) = " );
-    System.out.println("budget inutilizzato = ");
-    System.out.println("soluzione di base ottima = ");
+    System.out.println("budget inutilizzato = " );
+    System.out.println("soluzione di base ottima: " );
 
-    for(GRBVar var : model.getVars())
-    {
-      //stampo il valore delle variabili e i costi ridotti associati all'ottimo
-      System.out.println(var.get(StringAttr.VarName)+ ": "+ var.get(DoubleAttr.X) + " RC = " + var.get(DoubleAttr.RC));
+    for(GRBVar var : model.getVars()) {
+      // Stampo il valore delle variabili
+      System.out.println(String.format("%s = %.4f", var.get(StringAttr.VarName), var.get(DoubleAttr.X)) );
+    }
+
+    System.out.println("\nQUESITO 2:");
+    System.out.println("variabili di base: " );
+    System.out.println("coefficienti di costo ridotto: " );
+    System.out.println("soluzione ottima multipla: " );
+    System.out.println("soluzione ottima degenere: ");
+    System.out.println("vincoli vertice ottimo: ");
+
+    System.out.println("\nQUESITO 3:");
+    System.out.println("Per ogni soluzione:" );
+
+    for(GRBVar var : model.getVars()) {
+      // Stampo il valore delle variabili
+      System.out.println();
     }
 
     //per stamapre a video il valore ottimo delle slack/surplus del problema
