@@ -36,6 +36,7 @@ public class Prova {
                          {0,           0,      0,      1} };
 
     double[] vincoli = {30, 1/50., 1/50., 1/50., 1/50., 75, 35, 75, 35, 10, 10, 10, 10};
+
     try
     {
       GRBEnv env = new GRBEnv("pubblicita.log");

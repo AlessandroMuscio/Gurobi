@@ -13,13 +13,29 @@ public class Provami {
     int[] beta = {75, 35};      // Budget massimo per ogni emittente per ogni singola fascia
 
     int[][] tau = { {10, 10},
-                    {10, 10} }; // Minuti massimi divisi per emittente e per fascia
+            {10, 10} }; // Minuti massimi divisi per emittente e per fascia
 
     int[][] C = { {63, 72},
-                  {32, 34} };   // Costo al minuto per emittente e per fascia
+            {32, 34} };   // Costo al minuto per emittente e per fascia
 
-    int[][] P = { {11, 10},
-                  { 5,  7} };   // Spettatori al minuto per emittente e per fascia
+    int[][] P = { {18, 10},
+            { 5,  7} };   // Spettatori al minuto per emittente e per fascia
+
+    double[][] costi = { {11,          5,     10,      7},
+            {21/50.,      0,      0,      0},
+            {0,      16/35.,      0,      0},
+            {0,           0, 12/25.,      0},
+            {0,           0,      0, 17/35.},
+            {63,          0,      0,      0},
+            {0,          32,      0,      0},
+            {0,           0,     72,      0},
+            {0,           0,      0,     34},
+            {1,           0,      0,      0},
+            {0,           1,      0,      0},
+            {0,           0,      1,      0},
+            {0,           0,      0,      1} };
+
+    double[] vincoli = {30, 1/50., 1/50., 1/50., 1/50., 75, 35, 75, 35, 10, 10, 10, 10};
 
     try
     {
@@ -56,7 +72,7 @@ public class Provami {
 
       model.update();
 
-      stampa(model);
+      stampa(model, s);
 
     } catch (GRBException e) {
 
@@ -74,9 +90,9 @@ public class Provami {
 
   private static void aggiungiVincoliDiTempo(GRBModel model, GRBVar[][] xij, int[][] tau, GRBVar[] s, GRBVar[] y) throws GRBException {
 
-    for(int i = 0; i < tau.length; i++){
+    for(int j = 0; j < tau[0].length; j++){
 
-      for(int j = 0; j < tau[0].length; j++){
+      for(int i = 0; i < tau.length; i++){
 
         GRBLinExpr expr = new GRBLinExpr();
 
@@ -85,43 +101,47 @@ public class Provami {
         expr.addTerm(1.0, s[i+j+2*(tau.length*tau[0].length)+1]);
         expr.addTerm(1.0, y[i+j+2*(tau.length*tau[0].length)+1]);
 
-        model.addConstr(expr, GRB.LESS_EQUAL, tau[i][j], "vincolo di tempo" + i + ""+ j);
+        model.addConstr(expr, GRB.EQUAL, tau[i][j], "vincolo di tempo" + i + ""+ j);
       }
     }
   }
 
   private static void aggiungiVincoliDiCosto(GRBModel model, GRBVar[][] xij, int[][] C, int[] beta, GRBVar[] s, GRBVar[] y) throws GRBException {
 
-    for(int i = 0; i < C.length; i++){
+    for(int j = 0; j < C[0].length; j++){
 
-      for(int j = 0; j < C[0].length; j++){
+      for(int i = 0; i < C.length; i++){
 
         GRBLinExpr expr = new GRBLinExpr();
+
+        System.out.println(C[i][j]);
 
         expr.addTerm(C[i][j], xij[i][j]);
 
         expr.addTerm(1.0, s[i+j+(C.length*C[0].length)+1]);
         expr.addTerm(1.0, y[i+j+(C.length*C[0].length)+1]);
 
-        model.addConstr(expr, GRB.LESS_EQUAL, beta[i], "vincolo di costo" + i + ""+ j);
+        model.addConstr(expr, GRB.EQUAL, beta[i], "vincolo di costo" + i + ""+ j);
       }
     }
   }
 
   private static void aggiungiVincoliDiConcorrenza(GRBModel model, GRBVar[][] xij, int[][] C, int[] beta, double omega, GRBVar[] s, GRBVar[] y) throws GRBException {
 
-    for(int i = 0; i < C.length; i++){
+    for(int j = 0; j < C[0].length; j++){
 
-      for(int j = 0; j < C[0].length; j++){
+      for(int i = 0; i < C.length; i++){
 
         GRBLinExpr expr = new GRBLinExpr();
+
+        System.out.println((double)C[i][j]/(double)(beta[i]*C[0].length));
 
         expr.addTerm((double)C[i][j]/(double)(beta[i]*C[0].length), xij[i][j]);
 
         expr.addTerm(-1.0, s[i+j+1]);
         expr.addTerm(1.0, y[i+j+1]);
 
-        model.addConstr(expr, GRB.GREATER_EQUAL, omega, "vincolo di concorrenza" + i + ""+ j);
+        model.addConstr(expr, GRB.EQUAL, omega, "vincolo di concorrenza" + i + "" + j);
       }
     }
   }
@@ -130,9 +150,11 @@ public class Provami {
 
     GRBLinExpr expr = new GRBLinExpr();
 
-    for(int i = 0; i < P.length; i++){
+    for(int j = 0; j < P[0].length; j++){
 
-      for(int j = 0; j < P[0].length; j++){
+      for(int i = 0; i < P.length; i++){
+
+        System.out.println(P[i][j]);
 
         expr.addTerm(P[i][j], xij[i][j]);
       }
@@ -141,10 +163,11 @@ public class Provami {
     expr.addTerm(-1.0, s[0]);
     expr.addTerm(1.0, y[0]);
 
-    model.addConstr(expr, GRB.GREATER_EQUAL, S, "vincolo di copertura");
+    model.addConstr(expr, GRB.EQUAL, S, "vincolo di copertura");
   }
 
   private static void impostaParametri(GRBEnv env) throws GRBException {
+
     env.set(GRB.IntParam.Method, 0);
     env.set(GRB.IntParam.Presolve, 0);
   }
@@ -157,8 +180,10 @@ public class Provami {
     GRBVar[][] xij = new GRBVar[righe][colonne];
 
     for (int i = 0; i < righe; i++) {
+
       for (int j = 0; j < colonne; j++) {
-        xij[i][j] = model.addVar(0, GRB.INFINITY, 0, GRB.CONTINUOUS, "x"+i+"_"+j);
+
+        xij[i][j] = model.addVar(0, GRB.INFINITY, 0, GRB.CONTINUOUS, "x"+i+""+j);
       }
     }
 
@@ -172,6 +197,7 @@ public class Provami {
     GRBVar[] s = new GRBVar[lunghezza];
 
     for(int i = 0; i < lunghezza; i++) {
+
       s[i] = model.addVar(0, GRB.INFINITY, 0, GRB.CONTINUOUS, "s_" + i);
     }
 
@@ -185,6 +211,7 @@ public class Provami {
     GRBVar[] y = new GRBVar[lunghezza];
 
     for(int i = 0; i < lunghezza; i++) {
+
       y[i] = model.addVar(0, GRB.INFINITY, 0, GRB.CONTINUOUS, "y_" + i);
     }
 
@@ -215,9 +242,11 @@ public class Provami {
       for(int i = 0; i < P.length; i++){
 
         if(j < P[0].length/2 ){
+
           obj.addTerm(P[i][j], xij[i][j]);
         }
         else{
+
           obj.addTerm(-P[i][j], xij[i][j]);
         }
       }
@@ -227,9 +256,12 @@ public class Provami {
     model.set(GRB.IntAttr.ModelSense, GRB.MINIMIZE);
   }
 
-  private static void stampa(GRBModel model) throws GRBException {
+  private static void stampa(GRBModel model, GRBVar[] s) throws GRBException {
 
     GRBLinExpr obj = (GRBLinExpr) model.getObjective();
+    int status = model.get(GRB.IntAttr.Status);
+
+    System.out.println("\n\n\nStato Ottimizzazione: "+ status + "\n");
 
     System.out.println("\nGRUPPO 81");
     System.out.println("Componenti: muscio brignoli");
@@ -242,13 +274,22 @@ public class Provami {
     System.out.println("soluzione di base ottima: " );
 
     for(GRBVar var : model.getVars()) {
+
       // Stampo il valore delle variabili
       System.out.println(String.format("%s = %.4f", var.get(StringAttr.VarName), var.get(DoubleAttr.X)) );
     }
 
     System.out.println("\nQUESITO 2:");
     System.out.println("variabili di base: " );
-    System.out.println("coefficienti di costo ridotto: " );
+    System.out.print("coefficienti di costo ridotto: [" );
+
+    for(GRBVar var : model.getVars()) {
+      // Stampo il valore dei coefficienti di costo ridotto
+      System.out.print(String.format("%.4f, ", var.get(DoubleAttr.RC)) );
+    }
+
+    System.out.println("]" );
+
     System.out.println("soluzione ottima multipla: " );
     System.out.println("soluzione ottima degenere: ");
     System.out.println("vincoli vertice ottimo: ");

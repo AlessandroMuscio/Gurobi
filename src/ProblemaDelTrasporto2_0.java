@@ -1,6 +1,7 @@
 import gurobi.GRB;
 import gurobi.GRB.DoubleAttr;
 import gurobi.GRB.StringAttr;
+import gurobi.GRBConstr;
 import gurobi.GRBEnv;
 import gurobi.GRBException;
 import gurobi.GRBLinExpr;
@@ -9,7 +10,6 @@ import gurobi.GRBVar;
 
 public class ProblemaDelTrasporto2_0
 {
-
     public static void main(String[] args)
     {
         int[] produzione = {10, 15, 25, 5};
@@ -104,9 +104,9 @@ public class ProblemaDelTrasporto2_0
         GRBLinExpr obj = new GRBLinExpr();
 
         //funzione obiettivo del problema artificiale
-//		for(int i = 0; i < produzione.length + domanda.length; i++) {
-//			obj.addTerm(1.0, y[i]);
-//		}
+		for(int i = 0; i < produzione.length + domanda.length; i++) {
+		//	obj.addTerm(1.0, y[i]);
+		}
 
         for(int i = 0; i < produzione.length; i++) {
             for(int j = 0; j < domanda.length; j++) {
@@ -134,13 +134,13 @@ public class ProblemaDelTrasporto2_0
             expr.addTerm(1.0, s[i]);
 
             //se voglio risolvere il problema artificale della I fase
-            //expr.addTerm(1.0, y[i]);
+           // expr.addTerm(1.0, y[i]);
 
             //vincolo forma standard
-            //model.addConstr(expr, GRB.EQUAL, produzione[i], "vincolo_produzione_i_"+i);
+            model.addConstr(expr, GRB.EQUAL, produzione[i], "vincolo_produzione_i_"+i);
 
             //vincolo no forma standard
-            model.addConstr(expr, GRB.LESS_EQUAL, produzione[i], "vincolo_produzione_i_"+i);
+            //model.addConstr(expr, GRB.LESS_EQUAL, produzione[i], "vincolo_produzione_i_"+i);
 
         }
     }
@@ -160,13 +160,13 @@ public class ProblemaDelTrasporto2_0
             expr.addTerm(-1.0, s[produzione.length + j]);
 
             //se voglio risolvere il problema artificale della I fase
-            //expr.addTerm(1.0, y[produzione.length + j]);
+           // expr.addTerm(1.0, y[produzione.length + j]);
 
             //vincolo no forma standard
-            //model.addConstr(expr, GRB.EQUAL, domanda[j], "vincolo_domanda_j_"+j);
+            model.addConstr(expr, GRB.EQUAL, domanda[j], "vincolo_domanda_j_"+j);
 
             //vincolo no forma standard
-            model.addConstr(expr, GRB.GREATER_EQUAL, domanda[j], "vincolo_domanda_j_"+j);
+            //model.addConstr(expr, GRB.GREATER_EQUAL, domanda[j], "vincolo_domanda_j_"+j);
         }
     }
 
@@ -195,7 +195,7 @@ public class ProblemaDelTrasporto2_0
         }
 
         //per stamapre a video il valore ottimo delle slack/surplus del problema
-//		for(GRBConstr c: model.getConstrs()) 
+//		for(GRBConstr c: model.getConstrs())
 //		{
 //			System.out.println(c.get(StringAttr.ConstrName)+ ": "+ c.get(DoubleAttr.Slack));
 //			//Per gurobi SLACK vuol dire sia slack che surplus
