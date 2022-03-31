@@ -92,7 +92,7 @@ public class Provami {
     }
   }
 
-  private static void aggiungiVincoliDiTempo(GRBModel model, GRBVar[][] xij, int[][] tau, GRBVar[] s, GRBVar[] y) throws GRBException {
+  private static void aggiungiVincoliDiTempo(GRBModel model, GRBVar[] xij, int[][] tau, GRBVar[] s, GRBVar[] y) throws GRBException {
 
     for(int j = 0; j < tau[0].length; j++){
 
@@ -100,7 +100,7 @@ public class Provami {
 
         GRBLinExpr expr = new GRBLinExpr();
 
-        expr.addTerm(1, xij[i][j]);
+        expr.addTerm(1, xij[i]);
 
         expr.addTerm(1.0, s[i+j+2*(tau.length*tau[0].length)+1]);
         expr.addTerm(1.0, y[i+j+2*(tau.length*tau[0].length)+1]);
@@ -110,7 +110,7 @@ public class Provami {
     }
   }
 
-  private static void aggiungiVincoliDiCosto(GRBModel model, GRBVar[][] xij, int[][] C, int[] beta, GRBVar[] s, GRBVar[] y) throws GRBException {
+  private static void aggiungiVincoliDiCosto(GRBModel model, GRBVar[] xij, int[][] C, int[] beta, GRBVar[] s, GRBVar[] y) throws GRBException {
 
     for(int j = 0; j < C[0].length; j++){
 
@@ -120,7 +120,7 @@ public class Provami {
 
         System.out.println(C[i][j]);
 
-        expr.addTerm(C[i][j], xij[i][j]);
+        expr.addTerm(C[i][j], xij[i]);
 
         expr.addTerm(1.0, s[i+j+(C.length*C[0].length)+1]);
         expr.addTerm(1.0, y[i+j+(C.length*C[0].length)+1]);
@@ -130,7 +130,7 @@ public class Provami {
     }
   }
 
-  private static void aggiungiVincoliDiConcorrenza(GRBModel model, GRBVar[][] xij, int[][] C, int[] beta, double omega, GRBVar[] s, GRBVar[] y) throws GRBException {
+  private static void aggiungiVincoliDiConcorrenza(GRBModel model, GRBVar[] xij, int[][] C, int[] beta, double omega, GRBVar[] s, GRBVar[] y) throws GRBException {
 
     for(int j = 0; j < C[0].length; j++){
 
@@ -140,7 +140,7 @@ public class Provami {
 
         System.out.println((double)C[i][j]/(double)(beta[i]*C[0].length));
 
-        expr.addTerm((double)C[i][j]/(double)(beta[i]*C[0].length), xij[i][j]);
+        expr.addTerm((double)C[i][j]/(double)(beta[i]*C[0].length), xij[i]);
 
         expr.addTerm(-1.0, s[i+j+1]);
         expr.addTerm(1.0, y[i+j+1]);
@@ -234,7 +234,7 @@ public class Provami {
     model.set(GRB.IntAttr.ModelSense, GRB.MINIMIZE);
   }
 
-  private static void aggiungiFunzioneObiettivo(GRBModel model, GRBVar[][] xij, int[][] P) throws GRBException {
+  private static void aggiungiFunzioneObiettivo(GRBModel model, GRBVar[] xij, int[][] P) throws GRBException {
 
     GRBLinExpr obj = new GRBLinExpr();
 
@@ -244,11 +244,11 @@ public class Provami {
 
         if(j < P[0].length/2 ){
 
-          obj.addTerm(P[i][j], xij[i][j]);
+          obj.addTerm(P[i][j], xij[i]);
         }
         else{
 
-          obj.addTerm(P[i][j], xij[i][j]);
+          obj.addTerm(P[i][j], xij[i]);
         }
       }
     }
