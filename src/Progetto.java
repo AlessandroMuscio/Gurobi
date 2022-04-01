@@ -47,7 +47,7 @@ public class Progetto {
       GRBLinExpr expr1 = new GRBLinExpr();
       for (int j = 0; j < P[0].length; j++) {
         for (int i = 0; i < P.length; i++) {
-          expr0.addTerm(P[i][j], x[i+j+((P.length-1)*j)]);
+          expr1.addTerm(P[i][j], x[i+j+((P.length-1)*j)]);
         }
       }
       model.addConstr(expr1, GRB.GREATER_EQUAL, S, "VincoloDiCopertura");
@@ -83,8 +83,24 @@ public class Progetto {
       model.update();
       model.optimize();
       model.write("progetto.lp");
+
+      stampa(model);
     } catch (GRBException e) {
       System.out.println("Error code: " + e.getErrorCode() + ". " +e.getMessage());
+    }
+  }
+
+  private static void stampa(GRBModel model) throws GRBException{
+    GRBLinExpr obbiettivo = (GRBLinExpr) model.getObjective();
+
+    System.out.println("GRUPPO 81\nComponenti: Brignoli Muscio\n\nQUESITO I:");
+    System.out.println("funzione obbiettivo = " + obbiettivo.getValue());
+    System.out.println("copertura raggiunta totale (spettatori) = ");
+    System.out.println("tempo acquistato (minuti) = " );
+    System.out.println("budget inutilizzato = ");
+    System.out.println("soluzione di base ottima:");
+    for (GRBVar x : model.getVars()) {
+      System.out.println(x.get(GRB.StringAttr.VarName) + " = " + x.get(GRB.DoubleAttr.X));
     }
   }
 }
