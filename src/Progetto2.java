@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 public class Progetto2 {
 
+  /*
   private static final int M = 10; // N° emittenti televisive
   private static final int K = 8; // N° fasce orarie
   private static final int S = 84070; // Minima copertura giornaliera di spettatori da raggiungere
@@ -44,9 +45,26 @@ public class Progetto2 {
                                      {3128, 1174, 3179, 2326, 2529,  313, 1210, 2380},
                                      { 521, 1357, 1848,  876, 2090, 2752, 1386, 2122} }; // Spettatori al minuto di ogni emittente per ogni fascia
 
-  private static final GRBVar[] x = new GRBVar[M*K]; // Incognite del modello
+   */
 
-  private static int dimVarSlack = 0;
+  private static int M = 2;                  // Emittenti
+  private static int K = 2;                  // Fasce orarie
+  private static int S = 30;                 // Copertura giornaliera di spettatori
+  private static double omega = 0.01;        // Percentuale di budget minimo per fascia sul totale
+  private static int[] beta = {75, 35};      // Budget massimo per ogni emittente per ogni singola fascia
+
+  private static int[][] tau = { {10, 10},
+          {10, 10} }; // Minuti massimi divisi per emittente e per fascia
+
+  private static int[][] C = { {63, 72},
+          {32, 34} };   // Costo al minuto per emittente e per fascia
+
+  private static int[][] P = { {11, 10},
+          { 5,  7} };   // Spettatori al minuto per emittente e per fascia
+
+  private static GRBVar[] x = new GRBVar[M*K]; // Incognite del modello
+
+  private static int dimVariabili = 0;
   private static GRBLinExpr vincoloModulo0 = new GRBLinExpr();
   private static GRBLinExpr vincoloModulo1 = new GRBLinExpr();
   private static GRBLinExpr vincoloCopertura = new GRBLinExpr();
@@ -60,24 +78,31 @@ public class Progetto2 {
 
       // Setto l'ambiente e creo il modello
       GRBEnv ambiente = new GRBEnv(false); // Ho messo false invece che "Progetto.log" perché Gurobi non andava se lo facevo
-      ambiente.set(GRB.IntParam.Presolve, 0); // Disattivo il presolve
-      ambiente.set(GRB.IntParam.Method, 0); // Utilizzo il simplesso primale
-      //ambiente.set(GRB.DoubleParam.Heuristics, 0); // Non ho ancora ben capito cosa faccia pero nel dubbio
+      set(ambiente);
 
-      GRBModel modello = new GRBModel(ambiente);
+      GRBModel model = new GRBModel(ambiente);
 
       // Aggiungo le variabili, saranno una per ogni cella delle matrici, quindi M*K
       for (int i = 0; i < x.length; i++) {
-        x[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "x"+(i+1));
+        x[i] = model.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "x"+(i+1));
       }
 
       //Aggiungo la variabile ausiliaria per sciogliere il modulo
-      GRBVar a = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "a");
+      GRBVar a = model.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "a");
+
+      //Aggiungo le variabili di slack/surplus
+      int lunghezza = (C.length*C[0].length*3) + 3;
+      GRBVar[] s = new GRBVar[lunghezza];
+
+      for(int i = 0; i < lunghezza; i++) {
+
+        s[i] = model.addVar(0, GRB.INFINITY, 0, GRB.CONTINUOUS, "s_" + i);
+      }
 
       // Aggiungo la funzione obbiettivo
       GRBLinExpr obbiettivo = new GRBLinExpr();
       obbiettivo.addTerm(1, a);
-      modello.setObjective(obbiettivo, GRB.MINIMIZE);
+      model.setObjective(obbiettivo, GRB.MINIMIZE);
 
       // Aggiungo i vincoli di modulo
       for (int j = 0; j < P[0].length; j++) {
@@ -85,14 +110,14 @@ public class Progetto2 {
           vincoloModulo0.addTerm(j < P[0].length/2 ? P[i][j] : -P[i][j], x[i+j+((P.length-1)*j)]);
         }
       }
-      modello.addConstr(vincoloModulo0, GRB.LESS_EQUAL, a, "VincoloDiModulo_0");
+      model.addConstr(vincoloModulo0, GRB.EQUAL, a, "VincoloDiModulo_0");
 
       for (int j = 0; j < P[0].length; j++) {
         for (int i = 0; i < P.length; i++) {
           vincoloModulo1.addTerm(j < P[0].length/2 ? -P[i][j] : P[i][j], x[i+j+((P.length-1)*j)]);
         }
       }
-      modello.addConstr(vincoloModulo1, GRB.LESS_EQUAL, a, "VincoloDiModulo_1");
+      model.addConstr(vincoloModulo1, GRB.EQUAL, a, "VincoloDiModulo_1");
 
       // Aggiungo il vincolo di copertura
       for (int j = 0; j < P[0].length; j++) {
@@ -100,14 +125,15 @@ public class Progetto2 {
           vincoloCopertura.addTerm(P[i][j], x[i+j+((P.length-1)*j)]);
         }
       }
-      modello.addConstr(vincoloCopertura, GRB.GREATER_EQUAL, S, "VincoloDiCopertura");
+      model.addConstr(vincoloCopertura, GRB.EQUAL, S, "VincoloDiCopertura");
 
       // Aggiungo i vincoli di concorrenza
       for (int j = 0; j < C[0].length; j++) {
         for (int i = 0; i < C.length; i++) {
           vincoliConcorrenza[i][j] = new GRBLinExpr();
-          vincoliConcorrenza[i][j].addTerm(C[i][j], x[i+j+((P.length-1)*j)]);
-          modello.addConstr(vincoliConcorrenza[i][j], GRB.GREATER_EQUAL, omega*(beta[i]*K), "VincoloDiConcorrenza_" + i + "" + j);
+          vincoliConcorrenza[i][j].addTerm((double)C[i][j]/(double)(beta[i]*K), x[i+j+((P.length-1)*j)]);
+          model.addConstr(vincoliConcorrenza[i][j], GRB.EQUAL, omega, "VincoloDiConcorrenza_" + i + "" + j);
+          //model.addConstr(vincoliConcorrenza[i][j], GRB.LESS_EQUAL, beta[i], "VincoloDiCosto_" + i + "" + j);
         }
       }
 
@@ -116,26 +142,28 @@ public class Progetto2 {
         for (int i = 0; i < C.length; i++) {
           vincoliCosto[i][j] = new GRBLinExpr();
           vincoliCosto[i][j].addTerm(C[i][j], x[i+j+((P.length-1)*j)]);
-          modello.addConstr(vincoliCosto[i][j], GRB.LESS_EQUAL, beta[i], "VincoloDiCosto_" + i + "" + j);
+          model.addConstr(vincoliCosto[i][j], GRB.EQUAL, beta[i], "VincoloDiCosto_" + i + "" + j);
         }
       }
+
+
 
       // Aggiungo i vincoli di tempo
       for (int j = 0; j < C[0].length; j++) {
         for (int i = 0; i < C.length; i++) {
           vincoliTempo[i][j] = new GRBLinExpr();
           vincoliTempo[i][j].addTerm(1.0, x[i+j+((P.length-1)*j)]);
-          modello.addConstr(vincoliTempo[i][j], GRB.LESS_EQUAL, tau[i][j], "VincoloDiTempo_" + i + "" + j);
+          model.addConstr(vincoliTempo[i][j], GRB.LESS_EQUAL, tau[i][j], "VincoloDiTempo_" + i + "" + j);
         }
       }
 
       // Ottimizzazione
-      modello.update();
-      dimVarSlack= modello.getConstrs().length + modello.getVars().length;
-      modello.optimize();
-      modello.write("progetto.lp");
+      model.update();
+      dimVariabili = model.getVars().length + model.getConstrs().length;
+      model.optimize();
+      model.write("progetto.lp");
 
-      stampa(modello);
+      stampa(model);
 
       double temp = 0;
 
@@ -153,7 +181,16 @@ public class Progetto2 {
     }
   }
 
+  private static void set(GRBEnv ambiente) throws GRBException {
+    ambiente.set(GRB.IntParam.Presolve, 0); // Disattivo il presolve
+    ambiente.set(GRB.IntParam.Method, 0); // Utilizzo il simplesso primale
+    ambiente.set(GRB.DoubleParam.Heuristics, 0); // Non ho ancora ben capito cosa faccia pero nel dubbio
+  }
+
   private static void stampa(GRBModel model) throws GRBException{
+
+    int status = model.get(GRB.IntAttr.Status);
+    System.out.println("\n\n\nStato Ottimizzazione: "+ status + "\n");
 
     System.out.println("GRUPPO 81\nComponenti: Brignoli Muscio\n\nQUESITO I:");
     printObj(model);
@@ -167,7 +204,6 @@ public class Progetto2 {
     printCCR(model);
     printMultiplaDegenere(model);
     verticeOttimo(model);
-
   }
 
   public static void printObj(GRBModel model) throws GRBException {
@@ -201,9 +237,11 @@ public class Progetto2 {
       str.append(String.format("\n<%s> = <%.4f> ", v.get(GRB.StringAttr.VarName), v.get(GRB.DoubleAttr.X)));
     }
 
-/*  for(int i=0; i<model.getConstrs().length; i++) {
+    /*
+    for(int i=0; i<model.getConstrs().length; i++) {
       str.append(String.format(String.format("\n<%s> = <%.4f> ", constrs[i].get(GRB.StringAttr.VarName), constrs[i].get(GRB.DoubleAttr.X))));
-    }*/
+    }
+    */
 
     // CONTROLLARE PERCHÈ NON STAMPA LE SLACK
 
@@ -221,6 +259,16 @@ public class Progetto2 {
     for(int i=0; i<varInBase.length;i++) {
 
       str.append(String.format("<%d> ", varInBase[i]));
+    }
+
+    str.append("]\n");
+    str.append("variabili in base: [");
+
+    String[] varInBaseName = getInBaseVarsName(model);
+
+    for(int i=0; i<varInBaseName.length;i++) {
+
+      str.append(String.format("<%s> ", varInBaseName[i]));
     }
 
     str.append("]");
@@ -277,7 +325,7 @@ public class Progetto2 {
 
     double epsilon = 1e-5;
     boolean multipla = false;
-    int[] var_in_base = new int[Progetto2.dimVarSlack];
+    int[] var_in_base = new int[dimVariabili];
 
     int i =0;
     int index = 0;
@@ -334,18 +382,39 @@ public class Progetto2 {
   public static int[] getInBaseVars(GRBModel model) throws GRBException {
 
     int[] var_in_base = new int[model.getVars().length + model.getConstrs().length];
+    String[] var_in_baseN = new String[model.getVars().length + model.getConstrs().length];
     int index = 0;
 
     //variabili
     for (var v : model.getVars()){
 
-      var_in_base[index++] = v.get(GRB.IntAttr.VBasis) == GRB.BASIC ? 1 : 0;
+      var_in_base[index] = v.get(GRB.IntAttr.VBasis) == GRB.BASIC ? 1 : 0;
     }
 
     //slack
     for (var v : model.getConstrs()) {
 
-      var_in_base[index++] = v.get(GRB.IntAttr.CBasis) == GRB.BASIC ? 1 : 0;
+      var_in_base[index] = v.get(GRB.IntAttr.CBasis) == GRB.BASIC ? 1 : 0;
+    }
+
+    return var_in_base;
+  }
+
+  public static String[] getInBaseVarsName(GRBModel model) throws GRBException {
+
+    String[] var_in_base = new String[model.getVars().length + model.getConstrs().length];
+    int index = 0;
+
+    //variabili
+    for (var v : model.getVars()){
+
+      var_in_base[index++] = v.get(GRB.IntAttr.VBasis) == GRB.BASIC ? v.get(GRB.StringAttr.VarName) : "";
+    }
+
+    //slack
+    for (var v : model.getConstrs()) {
+
+      //var_in_base[index++] = v.get(GRB.IntAttr.CBasis) == GRB.BASIC ? v.get(GRB.StringAttr.VarName) : "";
     }
 
     return var_in_base;
