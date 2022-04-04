@@ -307,12 +307,12 @@ public class QuelloBello {
         str.append("coefficienti di costo ridotto: [");
 
         for(var v: model.getVars()) {
-            str.append(String.format("<%.4f> ", v.get(GRB.DoubleAttr.RC)));
+            str.append(String.format("<%s = %.4f> ", v.get(GRB.StringAttr.VarName) ,v.get(GRB.DoubleAttr.RC)));
         }
 
-        for(int i=0; i<model.getConstrs().length;i++) {
+    /*    for(int i=0; i<model.getConstrs().length;i++) {
             str.append(String.format("<%.4f> ", model.getConstr(i).get(GRB.DoubleAttr.Pi)));
-        }
+        }*/
 
         str.append("]");
         System.out.println(str);

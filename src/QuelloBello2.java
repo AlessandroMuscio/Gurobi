@@ -1,4 +1,5 @@
 import gurobi.*;
+import gurobi.GRB.DoubleAttr;
 
 public class QuelloBello2 {
 //*
@@ -116,6 +117,15 @@ public class QuelloBello2 {
             modello.write("QuelloBello0.sol");
 
             stampa(modello);
+
+          /*  double temp = 0;
+
+            for (int i = 0; i < vincoloCopertura.size(); i++) {
+
+                double temp2 = vincoloCopertura.getCoeff(i);
+
+                System.out.println(vincoloCopertura.getVar(i).get(GRB.StringAttr.VarName) + " " + temp2);
+            }*/
 
         } catch (GRBException e) {
             System.out.println("Error code: " + e.getErrorCode() + ". " + e.getMessage());
@@ -251,7 +261,7 @@ public class QuelloBello2 {
 
     public static void printObj(GRBModel model) throws GRBException {
         //stampo funzione obiettivo
-        System.out.println(String.format("funzione obiettivo = <%.4f>", model.get(GRB.DoubleAttr.ObjVal)));
+        System.out.println(String.format("funzione obiettivo = <%.4f>", model.get(DoubleAttr.ObjVal)));
     }
 
     public static void printOttimo(GRBModel model) throws GRBException {
@@ -262,7 +272,7 @@ public class QuelloBello2 {
         str.append("soluzione di base ottima:");
 
         for(GRBVar v: model.getVars()) {
-            str.append(String.format("\n<%s> = <%.4f> ", v.get(GRB.StringAttr.VarName), v.get(GRB.DoubleAttr.X)));
+            str.append(String.format("\n<%s> = <%.4f> ", v.get(GRB.StringAttr.VarName), v.get(DoubleAttr.X)));
         }
 
         System.out.println(str);
@@ -294,7 +304,7 @@ public class QuelloBello2 {
         str.append("coefficienti di costo ridotto: [");
 
         for(var v: model.getVars()) {
-            str.append(String.format("<%.4f> ", v.get(GRB.DoubleAttr.RC)));
+            str.append(String.format("<%s = %.4f> ", v.get(GRB.StringAttr.VarName) ,v.get(DoubleAttr.RC)));
         }
 
         str.append("]");
