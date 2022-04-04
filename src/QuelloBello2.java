@@ -2,7 +2,7 @@ import gurobi.*;
 import gurobi.GRB.DoubleAttr;
 
 public class QuelloBello2 {
-//*
+/*
     private static final int M = 10; // N° emittenti televisive
     private static final int K = 8; // N° fasce orarie
     private static final int S = 84070; // Minima copertura giornaliera di spettatori da raggiungere
@@ -41,7 +41,7 @@ public class QuelloBello2 {
             {1930, 2842, 2184, 3205, 1968, 1955, 1607,  648},
             {3128, 1174, 3179, 2326, 2529,  313, 1210, 2380},
             { 521, 1357, 1848,  876, 2090, 2752, 1386, 2122} }; // Spettatori al minuto di ogni emittente per ogni fascia
-//*/
+*/
 
 /*
     private static int M = 3;                  // Emittenti
@@ -61,9 +61,9 @@ public class QuelloBello2 {
     private static int[][] P = { {20, 5},
             {25, 11},
             {18, 22}};   // Spettatori al minuto per emittente e per fascia
- */
+// */
 
-/*
+//*
     private static int M = 2;                  // Emittenti
     private static int K = 2;                  // Fasce orarie
     private static int S = 30;                 // Copertura giornaliera di spettatori
@@ -78,7 +78,7 @@ public class QuelloBello2 {
 
     private static int[][] P = { {11, 10},
             { 5,  7} };   // Spettatori al minuto per emittente e per fascia
-*/
+//*/
 
     private static final GRBVar[] x = new GRBVar[M*K]; // Incognite del modello
     private static final GRBVar[] s = new GRBVar[M+K+3+M*K]; // Slack/Surplus per la forma standard
@@ -95,8 +95,6 @@ public class QuelloBello2 {
 
     private static int indiceSlack = 0;
     private static int indiceAusiliarie = 0;
-    private static int indiceAusiliarie1 = 0;
-
 
     public static void main(String[] args) {
 
@@ -117,15 +115,6 @@ public class QuelloBello2 {
             modello.write("QuelloBello0.sol");
 
             stampa(modello);
-
-          /*  double temp = 0;
-
-            for (int i = 0; i < vincoloCopertura.size(); i++) {
-
-                double temp2 = vincoloCopertura.getCoeff(i);
-
-                System.out.println(vincoloCopertura.getVar(i).get(GRB.StringAttr.VarName) + " " + temp2);
-            }*/
 
         } catch (GRBException e) {
             System.out.println("Error code: " + e.getErrorCode() + ". " + e.getMessage());
