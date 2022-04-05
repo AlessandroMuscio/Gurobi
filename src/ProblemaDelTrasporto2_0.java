@@ -10,6 +10,8 @@ import gurobi.GRBVar;
 
 public class ProblemaDelTrasporto2_0
 {
+    private static int dimVarSlack;
+
     public static void main(String[] args)
     {
         int[] produzione = {10, 15, 25, 5};
@@ -44,6 +46,35 @@ public class ProblemaDelTrasporto2_0
              * su carta: x12 + s = 1, s >= 0
              * Gurobi: x12 - s = 1, s <= 0
              */
+
+
+            model.update();
+
+            dimVarSlack= model.getConstrs().length+model.getVars().length;// assegno il n�di vincoli+ n� variabili per comodit�
+            //estraggo la matrice A
+            double[][] A= new double[model.getConstrs().length][dimVarSlack];
+            EstraiMatrA(model, A);
+
+            // estraggo b (i termini noti)
+            double[][]b = new double[model.getConstrs().length][1];
+            estraiTerminiNoti(model,b);
+
+            model.write ("model.lp");//stampo il file lp per verificare la coerenza del programma con il modello matematico
+
+            for (int i = 0; i < A.length; i++) {
+                for (int j = 0; j < A[0].length; j++) {
+                    System.out.print(A[i][j] + "     \t");
+                }
+                System.out.println();
+            }
+
+            for (int i = 0; i < b.length; i++) {
+                for (int j = 0; j < b[0].length; j++) {
+                    System.out.print(b[i][j] + "  ");
+                }
+                System.out.println();
+            }
+
 
             risolvi(model);
 
@@ -200,12 +231,62 @@ public class ProblemaDelTrasporto2_0
             System.out.println(var.get(StringAttr.VarName)+ ": "+ var.get(DoubleAttr.X) + " RC = " + var.get(DoubleAttr.RC));
         }
 
+        dimVarSlack= model.getConstrs().length+model.getVars().length;// assegno il n�di vincoli+ n� variabili per comodit�
+
+        double[][] A= new double[model.getConstrs().length][dimVarSlack];
+        EstraiMatrA(model, A);
+
+        // estraggo b (i termini noti)
+        double[][]b = new double[model.getConstrs().length][1];
+        estraiTerminiNoti(model,b);
+
+        model.write ("model.lp");//stampo il file lp per verificare la coerenza del programma con il modello matematico
+
+        for (int i = 0; i < A.length; i++) {
+            for (int j = 0; j < A[0].length; j++) {
+                System.out.print(A[i][j] + "     \t");
+            }
+            System.out.println();
+        }
+
+        for (int i = 0; i < b.length; i++) {
+            for (int j = 0; j < b[0].length; j++) {
+                System.out.print(b[i][j] + "  ");
+            }
+            System.out.println();
+        }
+
         //per stamapre a video il valore ottimo delle slack/surplus del problema
 //		for(GRBConstr c: model.getConstrs())
 //		{
 //			System.out.println(c.get(StringAttr.ConstrName)+ ": "+ c.get(DoubleAttr.Slack));
 //			//Per gurobi SLACK vuol dire sia slack che surplus
 //		}
+
+    }
+
+    public static void EstraiMatrA(GRBModel model, double[][] A) throws GRBException {
+
+        int rw = 0;
+        int cl = 0;
+
+        for (var c : model.getConstrs()) {//righe
+            for (var v : model.getVars()) {//colonne
+                A[rw][cl++] = model.getCoeff(c, v);
+            }
+            A[rw][model.getVars().length + rw] = 1;
+            //termini_noti[rw] = c.get(GRB.DoubleAttr.RHS);
+            rw++;
+            cl = 0;
+        }
+
+    }
+
+    public static void estraiTerminiNoti(GRBModel model, double[][] b) throws GRBException {
+        for(int i =0; i< model.getConstrs().length;i++) {
+            b[i] [0]= model.getConstr(i).get(DoubleAttr.RHS);
+
+        }
 
     }
 }

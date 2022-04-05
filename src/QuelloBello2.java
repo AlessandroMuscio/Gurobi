@@ -2,7 +2,7 @@ import gurobi.*;
 import gurobi.GRB.DoubleAttr;
 
 public class QuelloBello2 {
-/*
+//*
     private static final int M = 10; // N° emittenti televisive
     private static final int K = 8; // N° fasce orarie
     private static final int S = 84070; // Minima copertura giornaliera di spettatori da raggiungere
@@ -41,7 +41,7 @@ public class QuelloBello2 {
             {1930, 2842, 2184, 3205, 1968, 1955, 1607,  648},
             {3128, 1174, 3179, 2326, 2529,  313, 1210, 2380},
             { 521, 1357, 1848,  876, 2090, 2752, 1386, 2122} }; // Spettatori al minuto di ogni emittente per ogni fascia
-*/
+//*/
 
 /*
     private static int M = 3;                  // Emittenti
@@ -63,7 +63,7 @@ public class QuelloBello2 {
             {18, 22}};   // Spettatori al minuto per emittente e per fascia
 // */
 
-//*
+/*
     private static int M = 2;                  // Emittenti
     private static int K = 2;                  // Fasce orarie
     private static int S = 30;                 // Copertura giornaliera di spettatori
@@ -78,7 +78,7 @@ public class QuelloBello2 {
 
     private static int[][] P = { {11, 10},
             { 5,  7} };   // Spettatori al minuto per emittente e per fascia
-//*/
+*/
 
     private static final GRBVar[] x = new GRBVar[M*K]; // Incognite del modello
     private static final GRBVar[] s = new GRBVar[M+K+3+M*K]; // Slack/Surplus per la forma standard
@@ -92,6 +92,7 @@ public class QuelloBello2 {
     private static GRBLinExpr[][] vincoloTempo= new GRBLinExpr[M][K];
 
     private static GRBVar a;
+    private static int dimVarSlack;
 
     private static int indiceSlack = 0;
     private static int indiceAusiliarie = 0;
@@ -109,10 +110,30 @@ public class QuelloBello2 {
             aggiungiFunzioneObiettivo(modello);
             aggiungiVincoli(modello);
 
-            modello.update();
-            modello.optimize();
-            modello.write("QuelloBello0.lp");
-            modello.write("QuelloBello0.sol");
+            /*dimVarSlack= modello.getConstrs().length+modello.getVars().length;// assegno il n�di vincoli+ n� variabili per comodit�
+            //estraggo la matrice A
+            double[][] A= new double[modello.getConstrs().length][dimVarSlack];
+            EstraiMatrA(modello, A);
+
+            // estraggo b (i termini noti)
+            double[][]b = new double[modello.getConstrs().length][1];
+            estraiTerminiNoti(modello,b);
+
+            modello.write ("model.lp");//stampo il file lp per verificare la coerenza del programma con il modello matematico
+
+            for (int i = 0; i < A.length; i++) {
+                for (int j = 0; j < A[0].length; j++) {
+                    System.out.print(A[i][j] + "     \t");
+                }
+                System.out.println();
+            }
+
+            for (int i = 0; i < b.length; i++) {
+                for (int j = 0; j < b[0].length; j++) {
+                    System.out.print(b[i][j] + "  ");
+                }
+                System.out.println();
+            }*/
 
             stampa(modello);
 
@@ -129,9 +150,17 @@ public class QuelloBello2 {
 
     private static void stampa(GRBModel modello) throws GRBException{
 
+        modello.update();
+        modello.optimizeasync();
         System.out.println("GRUPPO 81\nComponenti: Brignoli Muscio\n\nQUESITO I:");
         printObj(modello);
-        printOttimo(modello);
+        //printOttimo(modello);
+
+        for(GRBVar var : modello.getVars())
+        {
+            //stampo il valore delle variabili e i costi ridotti associati all'ottimo
+            System.out.println(var.get(GRB.StringAttr.VarName)+ ": "+ var.get(DoubleAttr.X) + " RC = " + var.get(DoubleAttr.RC));
+        }
 
         System.out.println("\nQUESITO II:");
         printInBasis(modello);
@@ -167,16 +196,14 @@ public class QuelloBello2 {
                 vincoloModulo1.addTerm(j < K/2 ? -P[i][j] : P[i][j], x[i+j+(M-1)*j]);
             }
         }
-        vincoloModulo0.addTerm(1, s[indiceSlack++]);
+        /*vincoloModulo0.addTerm(1, s[indiceSlack++]);
         vincoloModulo0.addTerm(1, y[indiceAusiliarie++]);
 
         vincoloModulo1.addTerm(1, s[indiceSlack++]);
-        vincoloModulo1.addTerm(1, y[indiceAusiliarie++]);
+        vincoloModulo1.addTerm(1, y[indiceAusiliarie++]);*/
 
-        modello.addConstr(vincoloModulo0,GRB.EQUAL, a, "Vincolo_di_modulo_0");
-        modello.addConstr(vincoloModulo1,GRB.EQUAL, a, "Vincolo_di_modulo_1");
-
-        modello.update();
+        modello.addConstr(vincoloModulo0,GRB.LESS_EQUAL, a, "Vincolo_di_modulo_0");
+        modello.addConstr(vincoloModulo1,GRB.LESS_EQUAL, a, "Vincolo_di_modulo_1");
 
         // Vincolo di COPERTURA
         for (int i = 0; i < M; i++) {
@@ -184,12 +211,10 @@ public class QuelloBello2 {
                 vincoloCopertura.addTerm(P[i][j], x[i+j+(M-1)*j]);
             }
         }
-        vincoloCopertura.addTerm(-1, s[indiceSlack++]);
-        vincoloCopertura.addTerm(1, y[indiceAusiliarie++]);
+        /*vincoloCopertura.addTerm(-1, s[indiceSlack++]);
+        vincoloCopertura.addTerm(1, y[indiceAusiliarie++]);*/
 
-        modello.addConstr(vincoloCopertura,GRB.EQUAL, S, "Vincolo_di_copertura");
-
-        modello.update();
+        modello.addConstr(vincoloCopertura,GRB.GREATER_EQUAL, S, "Vincolo_di_copertura");
 
         //Vincoli di COSTO
         for (int i = 0; i < M; i++) {
@@ -198,10 +223,10 @@ public class QuelloBello2 {
             for (int j = 0; j < K; j++) {
                 vincoloCosto[i].addTerm(C[i][j], x[i+j+(M-1)*j]);
             }
-            vincoloCosto[i].addTerm(1, s[indiceSlack++]);
-            vincoloCosto[i].addTerm(1, y[indiceAusiliarie++]);
+            /*vincoloCosto[i].addTerm(1, s[indiceSlack++]);
+            vincoloCosto[i].addTerm(1, y[indiceAusiliarie++]);*/
 
-            modello.addConstr(vincoloCosto[i],GRB.EQUAL, beta[i], "Vincolo_di_costo_" + i);
+            modello.addConstr(vincoloCosto[i],GRB.LESS_EQUAL, beta[i], "Vincolo_di_costo_" + i);
         }
 
         //Vincoli di CONCORRENZA
@@ -217,33 +242,36 @@ public class QuelloBello2 {
             for (int i = 0; i < M; i++) {
                 vincoloConcorrenza[j].addTerm(C[i][j], x[i+j+(M-1)*j]);
             }
-            vincoloConcorrenza[j].addTerm(-1, s[indiceSlack++]);
-            vincoloConcorrenza[j].addTerm(1, y[indiceAusiliarie++]);
+            /*vincoloConcorrenza[j].addTerm(-1, s[indiceSlack++]);
+            vincoloConcorrenza[j].addTerm(1, y[indiceAusiliarie++]);*/
 
-            modello.addConstr(vincoloConcorrenza[j],GRB.EQUAL, termineNoto, "Vincolo_di_concorrenza_" + j);
+            modello.addConstr(vincoloConcorrenza[j],GRB.GREATER_EQUAL, termineNoto, "Vincolo_di_concorrenza_" + j);
         }
+
 
         //Vincoli di TEMPO
         for (int j = 0; j < K; j++) {
             for (int i = 0; i < M; i++) {
                 vincoloTempo[i][j] = new GRBLinExpr();
                 vincoloTempo[i][j].addTerm(1, x[i+j+(M-1)*j]);
-                vincoloTempo[i][j].addTerm(1, s[indiceSlack++]);
-                vincoloTempo[i][j].addTerm(1, y[indiceAusiliarie++]);
+                /*vincoloTempo[i][j].addTerm(1, s[indiceSlack++]);
+                vincoloTempo[i][j].addTerm(1, y[indiceAusiliarie++]);*/
 
-
-                modello.addConstr(vincoloTempo[i][j],GRB.EQUAL, tau[i][j], "Vincolo_di_tempo_" + i + "" +j);
+                modello.addConstr(vincoloTempo[i][j],GRB.LESS_EQUAL, tau[i][j], "Vincolo_di_tempo_" + i + "" +j);
             }
         }
+
     }
 
     private static void aggiungiFunzioneObiettivo(GRBModel modello) throws GRBException {
 
         GRBLinExpr funzioneObiettivo = new GRBLinExpr();
 
-        for (int i = 0; i < y.length ; i++) {
-            funzioneObiettivo.addTerm(1, y[i]);
-        }
+//       for (int i = 0; i < y.length ; i++) {
+//           funzioneObiettivo.addTerm(1, y[i]);
+//        }
+
+        funzioneObiettivo.addTerm(1, a);
 
         modello.setObjective(funzioneObiettivo, GRB.MINIMIZE);
     }
@@ -326,5 +354,30 @@ public class QuelloBello2 {
         }
 
         return var_in_base;
+    }
+
+    public static void EstraiMatrA(GRBModel model, double[][] A) throws GRBException {
+
+        int rw = 0;
+        int cl = 0;
+
+        for (var c : model.getConstrs()) {//righe
+            for (var v : model.getVars()) {//colonne
+                A[rw][cl++] = model.getCoeff(c, v);
+            }
+            A[rw][model.getVars().length + rw] = 1;
+            //termini_noti[rw] = c.get(GRB.DoubleAttr.RHS);
+            rw++;
+            cl = 0;
+        }
+
+    }
+
+    public static void estraiTerminiNoti(GRBModel model, double[][] b) throws GRBException {
+        for(int i =0; i< model.getConstrs().length;i++) {
+            b[i] [0]= model.getConstr(i).get(DoubleAttr.RHS);
+
+        }
+
     }
 }
