@@ -1,126 +1,46 @@
 import gurobi.*;
 import gurobi.GRB.DoubleAttr;
 
-public class QuelloBello2 {
-/*
+public class Finale {
+
     private static final int M = 10; // N° emittenti televisive
     private static final int K = 8; // N° fasce orarie
-    private static final int S = 84070; // Minima copertura giornaliera di spettatori da raggiungere
+    private static final int S = 82110; // Minima copertura giornaliera di spettatori da raggiungere
     private static final double omega = 0.02; // Percentuale di budget minimo spendibile per fascia
-    private static final int[] beta = {3176, 2804, 3011, 3486, 2606, 2887, 3132, 3211, 3033, 2721}; // Budget massimo che ogni emittente può spendere per ogni fascia
+    private static final int[] beta = {3373, 3281, 3274, 3410, 2691, 2613, 3354, 2912, 3203, 2616}; // Budget massimo che ogni emittente può spendere per ogni fascia
 
-    private static final int[][] tau = {    {3, 1, 1, 2, 2, 2, 2, 2},
-                                            {2, 2, 2, 2, 1, 1, 2, 3},
-                                            {1, 2, 2, 3, 1, 2, 2, 1},
-                                            {2, 2, 1, 1, 2, 1, 1, 1},
-                                            {2, 2, 3, 2, 1, 1, 3, 3},
-                                            {2, 2, 2, 3, 3, 1, 2, 2},
-                                            {2, 2, 2, 3, 2, 1, 3, 1},
-                                            {3, 3, 3, 2, 1, 3, 1, 3},
-                                            {2, 2, 2, 2, 1, 1, 3, 2},
-                                            {1, 2, 2, 2, 3, 2, 1, 1} }; // Minuti massimi che ogni emittente può acquistare per ogni fascia
+    private static final int[][] tau = {    {2, 2, 2, 1, 2, 2, 1, 3},
+                                            {2, 2, 1, 2, 2, 2, 2, 3},
+                                            {2, 2, 2, 2, 3, 1, 2, 1},
+                                            {2, 2, 2, 1, 1, 3, 2, 1},
+                                            {2, 1, 3, 2, 3, 2, 2, 1},
+                                            {2, 1, 2, 2, 2, 3, 3, 2},
+                                            {3, 3, 1, 1, 2, 1, 2, 2},
+                                            {3, 3, 2, 2, 2, 1, 3, 2},
+                                            {3, 2, 2, 2, 3, 3, 1, 2},
+                                            {3, 3, 3, 2, 2, 2, 3, 3}}; // Minuti massimi che ogni emittente può acquistare per ogni fascia
 
-    private static final int[][] C = {  {1146,  950, 1354, 1385, 1301, 1363, 1112, 1151},
-                                        {1026, 1293, 1107,  935, 1259, 1229, 1097, 1176},
-                                        { 935, 1383, 1387, 1021, 1359,  919,  900, 1021},
-                                        {1153, 1129,  994, 1133, 1099, 1372, 1055, 1003},
-                                        {1376, 1096, 1356, 1139, 1061, 1007, 1095, 1094},
-                                        { 957, 1248, 1055, 1332, 1336, 1100,  996, 1332},
-                                        { 928, 1045, 1237,  908, 1036, 1368,  903, 1379},
-                                        {1372,  919, 1394, 1268, 1010, 1352, 1088, 1343},
-                                        {1185,  906, 1113, 1119,  923, 1335, 1075, 1284},
-                                        {1269, 1089, 1198, 1008, 1016, 1289, 1373, 1105} }; // Costo al minuto di ogni emittente per ogni fascia
+    private static final int[][] C = {      {1400, 1198, 1272, 1082, 936, 1130, 1280, 1249},
+                                            {1069, 1358, 1194, 1227, 1344, 975, 1206, 1021},
+                                            {1285, 964, 1342, 924, 1286, 1298, 1320, 925},
+                                            {911, 1052, 959, 1149, 1170, 1363, 1296, 1002},
+                                            {1121, 1211, 988, 1168, 1175, 1037, 1066, 1221},
+                                            {929, 971, 1144, 1257, 1103, 1208, 1125, 1305},
+                                            {1345, 1103, 1349, 1213, 1101, 1283, 1303, 928},
+                                            {1385, 1136, 975, 1239, 1179, 1140, 1387, 1282},
+                                            {918, 1054, 1281, 1337, 935, 1119, 1210, 1132},
+                                            {1133, 1302, 927, 1179, 1027, 1207, 1150, 1088}}; // Costo al minuto di ogni emittente per ogni fascia
 
-    private static final int[][] P = {  { 553, 3444, 1098, 2171, 2145, 1429, 1932,  611},
-                                        { 944,  998, 2601,  495,  431, 1807, 1334, 2080},
-                                        {2674,  666, 3239,  583,  902, 2109, 1226, 1187},
-                                        {1384,  905, 1206, 2178, 2571, 2573, 3380, 2904},
-                                        {1333, 1114,  663, 1196, 1247, 3264, 3006, 2705},
-                                        {1342, 3414, 1399, 2325, 1791, 3362, 3359, 1078},
-                                        {1195, 3143, 2001, 3489, 2882, 2853,  527, 1682},
-                                        {1930, 2842, 2184, 3205, 1968, 1955, 1607,  648},
-                                        {3128, 1174, 3179, 2326, 2529,  313, 1210, 2380},
-                                        { 521, 1357, 1848,  876, 2090, 2752, 1386, 2122} }; // Spettatori al minuto di ogni emittente per ogni fascia
-*/
-
-    private static final int M = 10;
-    private static final int K = 6;
-    private static final int S = 85058;
-    private static final double omega = 0.02;
-    private static final int[] beta = { 2727, 3150, 3202, 2996, 2930, 2692, 3245, 3351, 3001, 3476};
-
-    private static final int[][] tau = {
-                {3, 1, 3, 2, 3, 2},
-                {2, 1, 3, 1, 2, 2},
-                {2, 1, 3, 2, 2, 2},
-                {1, 1, 1, 3, 2, 2},
-                {2, 2, 1, 2, 2, 3},
-                {2, 2, 2, 2, 3, 1},
-                {2, 2, 2, 3, 2, 3},
-                {2, 3, 3, 3, 2, 2},
-                {2, 1, 1, 3, 3, 2},
-                {2, 2, 1, 3, 3, 2}};
-
-    private static final int[][] C = {
-            {1312, 1346, 912, 1372, 959, 1240},
-            {1125, 1104, 1039, 1065, 923, 1008},
-            {1093, 1278, 1230, 1146, 1124, 1121},
-            {938, 1165, 1142, 1136, 939, 1327},
-            {1349, 1246, 1169, 925, 917, 1348},
-            {987, 1338, 1125, 977, 976, 1132},
-            {981, 986, 1028, 927, 944, 1387},
-            {1157, 901, 1047, 930, 1218, 1213},
-            {1365, 1000, 1185, 1229, 914, 1231},
-            {1136, 903, 1066, 1226, 1179, 1083}};
-
-    private static final int[][] P = {
-            {340, 2502, 2033, 1563, 1805, 2513},
-            {1669, 1710, 2742, 740, 1247, 2604},
-            {3448, 713, 708, 3424, 2667, 480},
-            {2013, 668, 3496, 1287, 518, 1544},
-            {1059, 1294, 2862, 1146, 2671, 1570},
-            {2018, 878, 444, 1608, 1432, 494},
-            {3325, 2901, 3392, 1461, 1493, 985},
-            {717, 419, 2192, 2881, 413, 1261},
-            {2726, 2180, 1901, 3145, 3265, 2892},
-            {1019, 2468, 1763, 700, 3426, 3064}};
-
-/*
-    private static int M = 3;                  // Emittenti
-    private static int K = 2;                  // Fasce orarie
-    private static int S = 100;                 // Copertura giornaliera di spettatori
-    private static double omega = 0.01;        // Percentuale di budget minimo per fascia sul totale
-    private static int[] beta = {22, 15, 25};      // Budget massimo per ogni emittente per ogni singola fascia
-
-    private static int[][] tau = { {5, 5},
-            {5, 5},
-            {5, 5}}; // Minuti massimi divisi per emittente e per fascia
-
-    private static int[][] C = { {4, 6},
-            {3, 2},
-            {5, 3}};   // Costo al minuto per emittente e per fascia
-
-    private static int[][] P = { {20, 5},
-            {25, 11},
-            {18, 22}};   // Spettatori al minuto per emittente e per fascia
-// */
-
-/*
-    private static int M = 2;                  // Emittenti
-    private static int K = 2;                  // Fasce orarie
-    private static int S = 30;                 // Copertura giornaliera di spettatori
-    private static double omega = 0.02;        // Percentuale di budget minimo per fascia sul totale
-    private static int[] beta = {140, 85};      // Budget massimo per ogni emittente per ogni singola fascia
-
-    private static int[][] tau = { {10, 10},
-            {10, 10} }; // Minuti massimi divisi per emittente e per fascia
-
-    private static int[][] C = { {63, 72},
-            {32, 34} };   // Costo al minuto per emittente e per fascia
-
-    private static int[][] P = { {11, 10},
-            { 5,  7} };   // Spettatori al minuto per emittente e per fascia
-*/
+    private static final int[][] P = {      {2890, 1584, 2905, 2465, 1128, 2285, 3204, 1009},
+                                            {3399, 355, 2070, 905, 814, 772, 2502, 2780},
+                                            {590, 2861, 744, 3245, 2846, 2545, 2584, 633},
+                                            {1332, 2682, 3264, 1558, 1162, 414, 1004, 1580},
+                                            {674, 1122, 1333, 1205, 3319, 2519, 2827, 1852},
+                                            {2481, 1761, 2079, 1197, 3223, 3478, 2767, 1462},
+                                            {1740, 3204, 2644, 3302, 474, 2765, 2296, 2376},
+                                            {3471, 1593, 2726, 1921, 1841, 1191, 2294, 1642},
+                                            {900, 3035, 2951, 1440, 852, 1842, 307, 3189},
+                                            {2104, 389, 3188, 365, 1931, 2563, 2770, 1844 } };
 
     private static final GRBVar[] x = new GRBVar[M*K]; // Incognite del modello
     private static final GRBVar[] s = new GRBVar[M+K+3+(M*K)]; // Slack/Surplus per la forma standard
@@ -152,9 +72,11 @@ public class QuelloBello2 {
             aggiungiFunzioneObiettivo(modello);
             aggiungiVincoli(modello);
 
+            modello.write ("modello.lp");//stampo il file lp per verificare la coerenza del programma con il modello matematico
+
             stampa(modello);
-            modello.write ("model.lp");//stampo il file lp per verificare la coerenza del programma con il modello matematico
-            modello.write ("model.sol");
+
+            modello.write ("modello.sol");
 
         } catch (GRBException e) {
             System.out.println("Error code: " + e.getErrorCode() + ". " + e.getMessage());
@@ -239,7 +161,9 @@ public class QuelloBello2 {
         vincoloModulo0.addTerm(1, y[indiceAusiliarie++]);
 
         vincoloModulo1.addTerm(1, s[indiceSlack++]);
-        vincoloModulo1.addTerm(1, y[indiceAusiliarie++]);*/
+        vincoloModulo1.addTerm(1, y[indiceAusiliarie++]);
+
+         */
 
         modello.addConstr(vincoloModulo0,GRB.LESS_EQUAL, a, "Vincolo_di_modulo_0");
         modello.addConstr(vincoloModulo1,GRB.LESS_EQUAL, a, "Vincolo_di_modulo_1");
@@ -251,7 +175,9 @@ public class QuelloBello2 {
             }
         }
         /*vincoloCopertura.addTerm(-1, s[indiceSlack++]);
-        vincoloCopertura.addTerm(1, y[indiceAusiliarie++]);*/
+        vincoloCopertura.addTerm(1, y[indiceAusiliarie++]);
+
+         */
 
         modello.addConstr(vincoloCopertura,GRB.GREATER_EQUAL, S, "Vincolo_di_copertura");
 
@@ -263,12 +189,14 @@ public class QuelloBello2 {
                 vincoloCosto[i].addTerm(C[i][j], x[i+j+(M-1)*j]);
             }
             /*vincoloCosto[i].addTerm(1, s[indiceSlack++]);
-            vincoloCosto[i].addTerm(1, y[indiceAusiliarie++]);*/
+            vincoloCosto[i].addTerm(1, y[indiceAusiliarie++]);
 
+
+             */
             modello.addConstr(vincoloCosto[i],GRB.LESS_EQUAL, beta[i], "Vincolo_di_costo_" + i);
         }
 
-        //Vincoli di CONCORRENZA
+        //Vincoli di BUDGET
         double termineNoto = 0.0;
         for (int i = 0; i < M; i++) {
             termineNoto += beta[i];
@@ -282,9 +210,11 @@ public class QuelloBello2 {
                 vincoloConcorrenza[j].addTerm(C[i][j], x[i+j+(M-1)*j]);
             }
             /*vincoloConcorrenza[j].addTerm(-1, s[indiceSlack++]);
-            vincoloConcorrenza[j].addTerm(1, y[indiceAusiliarie++]);*/
+            vincoloConcorrenza[j].addTerm(1, y[indiceAusiliarie++]);
 
-            modello.addConstr(vincoloConcorrenza[j],GRB.GREATER_EQUAL, termineNoto, "Vincolo_di_concorrenza_" + j);
+
+             */
+            modello.addConstr(vincoloConcorrenza[j],GRB.GREATER_EQUAL, termineNoto, "Vincolo_di_budget_" + j);
         }
 
 
@@ -294,8 +224,10 @@ public class QuelloBello2 {
                 vincoloTempo[i][j] = new GRBLinExpr();
                 vincoloTempo[i][j].addTerm(1, x[i+j+(M-1)*j]);
                 /*vincoloTempo[i][j].addTerm(1, s[indiceSlack++]);
-                vincoloTempo[i][j].addTerm(1, y[indiceAusiliarie++]);*/
+                vincoloTempo[i][j].addTerm(1, y[indiceAusiliarie++]);
 
+
+                 */
                 modello.addConstr(vincoloTempo[i][j],GRB.LESS_EQUAL, tau[i][j], "Vincolo_di_tempo_" + i + "" +j);
             }
         }
@@ -306,9 +238,11 @@ public class QuelloBello2 {
 
         GRBLinExpr funzioneObiettivo = new GRBLinExpr();
 
-        //for (int i = 0; i < y.length ; i++) {
-      //      funzioneObiettivo.addTerm(1, y[i]);
-      //  }
+        /*for (int i = 0; i < y.length ; i++) {
+            funzioneObiettivo.addTerm(1, y[i]);
+        }
+
+         */
 
         funzioneObiettivo.addTerm(1, a);
 
