@@ -323,6 +323,9 @@ public class App {
     System.out.println("tempo acquistato (minuti) = " + calcolaTempoAcquistato());
     System.out.println("budget inutilizzato = " + calcolaBilancioInutilizzato());
     System.out.print("soluzione di base ottima:\n" + ottieniSoluzioneDiBaseOttima());
+
+    System.out.println("QUESITO II:\nvariabili in base: [" + ottieniVariabiliInBase() + "]");
+    System.out.println("coefficienti di costo ridotto: [" + ottieneCCR() + "]");
   }
 
   /**
@@ -432,5 +435,42 @@ public class App {
     }
 
     return  soluzioneDiBaseOttima.toString();
+  }
+
+  /**
+   * Metodo per ottenere tutte le variabili in base del modello
+   *
+   * @return Una <code>String</code> rappresentante tutte le variabili in base del modello
+   * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
+   */
+  private static String ottieniVariabiliInBase() throws GRBException {
+    StringBuilder variabiliInBase = new StringBuilder();
+
+    for (GRBVar x : modello.getVars()) {
+      double inBase = x.get(GRB.IntAttr.VBasis);
+
+      variabiliInBase.append(inBase == GRB.BASIC ? "1" : "0");
+      variabiliInBase.append(", ");
+    }
+
+    return variabiliInBase.toString().substring(0, variabiliInBase.length()-2);
+  }
+
+  /**
+   * Metodo per ottenere tutti i coefficienti di costo ridotto delle variabili del modello
+   *
+   * @return Una <code>String</code> rappresentante tutti i coefficienti di costo ridotto delle variabili del modello
+   * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
+   */
+  private static String ottieneCCR() throws GRBException {
+    StringBuilder ccrBuilder = new StringBuilder();
+
+    for (GRBVar x : modello.getVars()) {
+      double ccr = x.get(GRB.DoubleAttr.RC);
+
+      ccrBuilder.append(String.format("%.4f, ", ccr));
+    }
+
+    return ccrBuilder.toString().substring(0, ccrBuilder.length()-2);
   }
 }

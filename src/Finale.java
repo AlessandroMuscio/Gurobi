@@ -310,7 +310,7 @@ public class Finale {
         //variabili
         for (var v : model.getVars()){
 
-            var_in_base[index++] = v.get(GRB.IntAttr.VBasis) == GRB.BASIC ? 1 : 0;
+            var_in_base[index++] =  v.get(GRB.IntAttr.VBasis) == GRB.BASIC ? 1 : 0;
         }
 
         return var_in_base;
