@@ -1,241 +1,436 @@
-import gurobi.GRB;
-import gurobi.GRB.DoubleAttr;
-import gurobi.GRB.StringAttr;
-import gurobi.GRBConstr;
-import gurobi.GRBEnv;
-import gurobi.GRBException;
-import gurobi.GRBLinExpr;
-import gurobi.GRBModel;
-import gurobi.GRBVar;
+/*Consegna***********************************************************************************************************************************
+* Il responsabile marketing di una nota azienda di Matriciopoli è incaricato dell’acquisto di spazi pubblicitari su M emittenti televisive. *
+* La giornata televisiva è suddivisa in j = 1, 2, ..., K fasce orarie in cui è possibile acquistare minuti di pubblicità. In particolare,   *
+* in ciascuna fascia j dell’emittente i, i = 1, ..., M : l’azienda può finalizzare l’acquisto a un costo pari a Cij euro/minuto             *
+* garantendosi una copertura di Pij spettatori/minuto; non può acquistare più di τij minuti, per questioni di libera concorrenza. La        *
+* direzione stabilisce di voler investire non più di βi euro su una qualsivoglia emittente i, ma almeno Ω% del bilancio totale su ogni      *
+* fascia oraria j. Sapendo che l’azienda desidera ottenere una copertura giornaliera complessiva di almeno S spettatori, si aiuti il        *
+* responsabile a decidere la programmazione ideale in modo da minimizzare lo scarto tra le persone raggiunte nelle prime K/2 fasce orarie e *
+* le persone raggiunte nelle restanti.                                                                                                      *
+*********************************************************************************************************************************************/
+
+import gurobi.*;
+
+/**
+ * Classe principale contenete l'intero modello, non che il suo svolgimento
+ */
 public class App {
+  //Variabili del problema
+  /**
+   * Variabile che rappresenta il numero di emittenti televisive
+   */
+  private static final int M = 10;
+  /**
+   * Variabile che rappresenta il numero di fasce orarie in una giornata
+   */
+  private static final int K = 8;
+  /**
+   * Variabile che rappresenta il minimo numero di spettatori giornalieri da raggiungere
+   */
+  private static final int S = 82110;
+  /**
+   * Variabile che rappresenta la percentuale minima di bilancio da spendere per emittente sul bilancio totale
+   */
+  private static final double omega = 0.02;
+  /**
+   * Variabile che rappresenta il massimo bilancio spendibile per emittente
+   */
+  private static final int[] beta = {3373, 3281, 3274, 3410, 2691, 2613, 3354, 2912, 3203, 2616};
+  /**
+   * Variabile che rappresenta il numero massimo di minuti acquistabili da ogni emittente per fascia oraria
+   */
+  private static final int[][] tau = {{2, 2, 2, 1, 2, 2, 1, 3},
+                                      {2, 2, 1, 2, 2, 2, 2, 3},
+                                      {2, 2, 2, 2, 3, 1, 2, 1},
+                                      {2, 2, 2, 1, 1, 3, 2, 1},
+                                      {2, 1, 3, 2, 3, 2, 2, 1},
+                                      {2, 1, 2, 2, 2, 3, 3, 2},
+                                      {3, 3, 1, 1, 2, 1, 2, 2},
+                                      {3, 3, 2, 2, 2, 1, 3, 2},
+                                      {3, 2, 2, 2, 3, 3, 1, 2},
+                                      {3, 3, 3, 2, 2, 2, 3, 3}};
+  /**
+   * Variabile che rappresenta il costo, in €, al minuto per emittente in ogni fascia oraria
+   */
+  private static final int[][] C = {{1400, 1198, 1272, 1082,  936, 1130, 1280, 1249},
+                                    {1069, 1358, 1194, 1227, 1344,  975, 1206, 1021},
+                                    {1285,  964, 1342,  924, 1286, 1298, 1320,  925},
+                                    { 911, 1052,  959, 1149, 1170, 1363, 1296, 1002},
+                                    {1121, 1211,  988, 1168, 1175, 1037, 1066, 1221},
+                                    { 929,  971, 1144, 1257, 1103, 1208, 1125, 1305},
+                                    {1345, 1103, 1349, 1213, 1101, 1283, 1303,  928},
+                                    {1385, 1136,  975, 1239, 1179, 1140, 1387, 1282},
+                                    { 918, 1054, 1281, 1337,  935, 1119, 1210, 1132},
+                                    {1133, 1302,  927, 1179, 1027, 1207, 1150, 1088}};
+  /**
+   * Variabile che rappresenta il numero di spettatori al minuto per emittente in ogni fascia oraria
+   */
+  private static final int[][] P = {{2890, 1584, 2905, 2465, 1128, 2285, 3204, 1009},
+                                    {3399,  355, 2070,  905,  814,  772, 2502, 2780},
+                                    { 590, 2861,  744, 3245, 2846, 2545, 2584,  633},
+                                    {1332, 2682, 3264, 1558, 1162,  414, 1004, 1580},
+                                    { 674, 1122, 1333, 1205, 3319, 2519, 2827, 1852},
+                                    {2481, 1761, 2079, 1197, 3223, 3478, 2767, 1462},
+                                    {1740, 3204, 2644, 3302,  474, 2765, 2296, 2376},
+                                    {3471, 1593, 2726, 1921, 1841, 1191, 2294, 1642},
+                                    { 900, 3035, 2951, 1440,  852, 1842,  307, 3189},
+                                    {2104,  389, 3188,  365, 1931, 2563, 2770, 1844}};
+
+  //Variabili di Gurobi
+  /**
+   * Variabile che rappresenta il modello del problema
+   */
+  private static GRBModel modello;
+  /**
+   * Variabile che rappresenta le incognite del modello
+   */
+  private static final GRBVar[] x = new GRBVar[M*K];
+  /**
+   * Variabile che rappresenta le slack/surplus del modello
+   */
+  private static final GRBVar[] s = new GRBVar[M+K+3+(M*K)];
+  /**
+   * Variabile che rappresenta le variabili ausiliarie del modello
+   */
+  private static final GRBVar[] y = new GRBVar[M+K+3+(M*K)];
+  /**
+   * Variabile che rappresenta la funzione obbiettivo del modello
+   */
+  private static GRBVar a;
+
+  // Utilizzare per risolvere il modello in FORMA STANDARD
+  /*private static int indiceSlack = 0;
+  private static int indiceAusiliarie = 0;*/
 
   public static void main(String[] args) {
+    try {
+      GRBEnv ambiente = new GRBEnv("App.log"); // Creo l'ambiente di Gurobi impostando il file dei log del programma
+      ambiente.set(GRB.IntParam.OutputFlag, 0); // Disattivo l'output di default di Gurobi
+      ambiente.set(GRB.IntParam.Presolve, 0); // Disattivo gli algoritmi di presolve
+      ambiente.set(GRB.IntParam.Method, 0); // Imposto l'utilizzo del simplesso semplice
 
-    int M = 10;           // Emittenti
-    int K = 8;            // Fasce orarie
-    int S = 84070;        // Copertura giornaliera di spettatori
-    double omega = 0.02;  // Percentuale di budget minimo per fascia sul totale
-    int[] beta = {3176, 2804, 3011, 3486, 2606, 2887, 3132, 3211, 3033, 2721};      // Budget massimo per ogni emittente per ogni singola fascia
+      modello = new GRBModel(ambiente); // Creo un modello vuoto utilizzando l'ambiente precedentemente creato
+      
+      inizializzaVariabili();
 
-    int[][] tau = { {3, 1, 1, 2, 2, 2, 2, 2},
-                    {2, 2, 2, 2, 1, 1, 2, 3},
-                    {1, 2, 2, 3, 1, 2, 2, 1},
-                    {2, 2, 1, 1, 2, 1, 1, 1},
-                    {2, 2, 3, 2, 1, 1, 3, 3},
-                    {2, 2, 2, 3, 3, 1, 2, 2},
-                    {2, 2, 2, 3, 2, 1, 3, 1},
-                    {3, 3, 3, 2, 1, 3, 1, 3},
-                    {2, 2, 2, 2, 1, 1, 3, 2},
-                    {1, 2, 2, 2, 3, 2, 1, 1} };    // Minuti massimi divisi per emittente e per fascia
+      impostaFunzioneObbiettivo();
 
-    int[][] C = { {1146,  950, 1354, 1385, 1301, 1363, 1112, 1151},
-                  {1026, 1293, 1107,  935, 1259, 1229, 1097, 1176},
-                  { 935, 1383, 1387, 1021, 1359,  919,  900, 1021},
-                  {1153, 1129,  994, 1133, 1099, 1372, 1055, 1003},
-                  {1376, 1096, 1356, 1139, 1061, 1007, 1095, 1094},
-                  { 957, 1248, 1055, 1332, 1336, 1100,  996, 1332},
-                  { 928, 1045, 1237,  908, 1036, 1368,  903, 1379},
-                  {1372,  919, 1394, 1268, 1010, 1352, 1088, 1343},
-                  {1185,  906, 1113, 1119,  923, 1335, 1075, 1284},
-                  {1269, 1089, 1198, 1008, 1016, 1289, 1373, 1105} };        // Costo al minuto per emittente e per fascia
+      impostaVincoliDiModulo();
+      impostaVincoliDiCopertura();
+      impostaVincoliDiCosto();
+      impostaVincoliDiBilancio();
+      impostaVincoliDiTempo();
 
-    int[][] P = { { 553, 3444, 1098, 2171, 2145, 1429, 1932,  611},
-                  { 944,  998, 2601,  495,  431, 1807, 1334, 2080},
-                  {2674,  666, 3239,  583,  902, 2109, 1226, 1187},
-                  {1384,  905, 1206, 2178, 2571, 2573, 3380, 2904},
-                  {1333, 1114,  663, 1196, 1247, 3264, 3006, 2705},
-                  {1342, 3414, 1399, 2325, 1791, 3362, 3359, 1078},
-                  {1195, 3143, 2001, 3489, 2882, 2853,  527, 1682},
-                  {1930, 2842, 2184, 3205, 1968, 1955, 1607,  648},
-                  {3128, 1174, 3179, 2326, 2529,  313, 1210, 2380},
-                  { 521, 1357, 1848,  876, 2090, 2752, 1386, 2122} };        // Spettatori al minuto per emittente e per fascia
-
-    int[] produzione = {10, 15, 25, 5};
-    int[] domanda = {8, 25, 18};
-    int[][] costi = {{10, 5, 15}, {12, 10, 13}, {15, 13, 13}, {10, 5, 5}};
-
-    try
-    {
-      GRBEnv env = new GRBEnv("pubblicita.log");
-      impostaParametri(env);
-
-      GRBModel model = new GRBModel(env);
-
-      GRBVar[][] xij = aggiungiVariabili(model, produzione, domanda);
-
-      //variabili per far risolvere a Gurobi direttamente la forma standard del problema
-      GRBVar[] s = aggiungiVariabiliSlackSurplus(model, produzione, domanda);
-
-      //variabili per far risolvere a Gurobi il problema artificiale della I fase
-      GRBVar[] y = aggiungiVariabiliAusiliarie(model, produzione, domanda);
-
-      aggiungiFunzioneObiettivo(model, xij, costi, y, produzione, domanda);
-
-      aggiungiVincoliProduzione(model, xij, s, y, produzione);
-
-      aggiungiVincoliDomanda(model, xij, s, y, produzione, domanda);
-
-      //model.addConstr(xij[0][1], GRB.GREATER_EQUAL, 1, "vincolo_aggiuntivo");
-      /*
-       * ATTENZIONE!
-       * x12 >= 1 diventa
-       * su carta: x12 + s = 1, s >= 0
-       * Gurobi: x12 - s = 1, s <= 0
-       */
-
-      risolvi(model);
-
-    } catch (GRBException e)
-    {
-      e.printStackTrace();
+      calcolaEStampa();
+    } catch (GRBException e) {
+      System.out.println("Error code: " + e.getErrorCode() + ". " + e.getMessage());
     }
   }
 
-  private static void impostaParametri(GRBEnv env) throws GRBException {
-    env.set(GRB.IntParam.Method, 0);
-    env.set(GRB.IntParam.Presolve, 0);
-  }
-
-  private static GRBVar[][] aggiungiVariabili(GRBModel model, int[] produzione, int[] domanda) throws GRBException {
-
-    GRBVar[][] xij = new GRBVar[produzione.length][domanda.length];
-
-    for (int i = 0; i < produzione.length; i++) {
-      for (int j = 0; j < domanda.length; j++) {
-        xij[i][j] = model.addVar(0, GRB.INFINITY, 0, GRB.CONTINUOUS, "xij_"+i+"_"+j);
-      }
-    }
-    return xij;
-  }
-
-
-  private static GRBVar[] aggiungiVariabiliSlackSurplus(GRBModel model, int[] produzione, int[] domanda) throws GRBException
-  {
-    GRBVar[] s = new GRBVar[produzione.length + domanda.length];
-
-    for(int i = 0; i < produzione.length + domanda.length; i++) {
-      s[i] = model.addVar(0, GRB.INFINITY, 0, GRB.CONTINUOUS, "s_" + i);
+  /**
+   * Metodo che inizializza le variabile, senza valorizzarle
+   *
+   * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
+   */
+  private static void inizializzaVariabili() throws GRBException {
+    // Inizializzazione delle incognite del modello
+    for (int i = 0; i < x.length; i++) {
+      x[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "x"+(i+1));
     }
 
-    return s;
-  }
-
-
-
-  private static GRBVar[] aggiungiVariabiliAusiliarie(GRBModel model, int[] produzione, int[] domanda) throws GRBException
-  {
-    GRBVar[] s = new GRBVar[produzione.length + domanda.length];
-
-    for(int i = 0; i < produzione.length + domanda.length; i++) {
-      s[i] = model.addVar(0, GRB.INFINITY, 0, GRB.CONTINUOUS, "s_" + i);
+    // Inizializzazione delle slack/surplus e delle variabili ausiliarie del modello
+    for (int i = 0; i < s.length; i++) {
+      s[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "s"+(i+1));
+      y[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "y"+(i+1));
     }
 
-    return s;
+    // Inizializzazione della funzione obbiettivo
+    a = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "a");
   }
 
+  /**
+   * Metodo che crea un'espressione lineare che verrà impostata come funzione obbiettivo del modello
+   *
+   * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
+   */
+  private static void impostaFunzioneObbiettivo() throws GRBException {
+    GRBLinExpr funzioneObiettivo = new GRBLinExpr(); // Creo un'espressione lineare che andrà a rappresentare la mia funzione obbiettivo
 
-  private static void aggiungiFunzioneObiettivo(GRBModel model, GRBVar[][] xij, int[][] costi, GRBVar[] y, int[] produzione, int[] domanda) throws GRBException
-  {
-    GRBLinExpr obj = new GRBLinExpr();
+    funzioneObiettivo.addTerm(1, a); // Aggiungo il termine 'a' alla funzione obbiettivo
 
-    //funzione obiettivo del problema artificiale
-//		for(int i = 0; i < produzione.length + domanda.length; i++) {
-//			obj.addTerm(1.0, y[i]);
-//		}
+    modello.setObjective(funzioneObiettivo, GRB.MINIMIZE); // Imposto come funzione obbiettivo del modello l'espressione lineare creata dicendo che voglio minimizzarla
+  }
 
-    for(int i = 0; i < produzione.length; i++) {
-      for(int j = 0; j < domanda.length; j++) {
-        obj.addTerm(costi[i][j], xij[i][j]);
+  /**
+   * Metodo che crea e imposta le due espressioni lineari rappresentanti i due vincoli di moduli
+   *
+   * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
+   */
+  private static void impostaVincoliDiModulo() throws GRBException {
+    // Creo due espressioni lineari che andranno a rappresentare i vincoli di moduli
+    GRBLinExpr vincoloDiModulo0 = new GRBLinExpr();
+    GRBLinExpr vincoloDiModulo1 = new GRBLinExpr();
+
+    // Aggiungo le variabili alle rispettive espressioni lineari
+    for (int j = 0; j < K; j++) {
+      for (int i = 0; i < M; i++) {
+        vincoloDiModulo0.addTerm(j < K/2 ? P[i][j] : -P[i][j], x[i+j+(M-1)*j]);
+        vincoloDiModulo1.addTerm(j < K/2 ? -P[i][j] : P[i][j], x[i+j+(M-1)*j]);
       }
     }
 
+    // Aggiungo le variabili di slack/surplus e quelle ausiliarie alle rispettive espressioni lineari (FORMA STANDARD)
+    /*vincoloModulo0.addTerm(1, s[indiceSlack++]);
+    vincoloModulo0.addTerm(1, y[indiceAusiliarie++]);
 
-    model.setObjective(obj);
-    model.set(GRB.IntAttr.ModelSense, GRB.MINIMIZE);
+    vincoloModulo1.addTerm(1, s[indiceSlack++]);
+    vincoloModulo1.addTerm(1, y[indiceAusiliarie++]);*/
+
+    // Aggiungo i vincoli con il termine noto al modello (FORMA NON STANDARD)
+    modello.addConstr(vincoloDiModulo0, GRB.LESS_EQUAL, a, "Vincolo_di_modulo_0");
+    modello.addConstr(vincoloDiModulo1, GRB.LESS_EQUAL, a, "Vincolo_di_modulo_1");
+
+    // Aggiungo i vincoli con il termine noto al modello (FORMA STANDARD)
+    /*modello.addConstr(vincoloModulo0, GRB.EQUAL, a, "Vincolo_di_modulo_0");
+    modello.addConstr(vincoloModulo1, GRB.EQUAL, a, "Vincolo_di_modulo_1");*/
   }
 
-  private static void aggiungiVincoliProduzione(GRBModel model, GRBVar[][] xij, GRBVar[] s, GRBVar [] y, int[] produzione) throws GRBException
-  {
-    for (int i = 0; i < produzione.length; i++)
-    {
-      GRBLinExpr expr = new GRBLinExpr();
+  /**
+   * Metodo che crea e imposta l'espressione lineare rappresentante il vincolo di copertura
+   *
+   * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
+   */
+  private static void impostaVincoliDiCopertura() throws GRBException {
+    // Creo un'espressioni lineare che andrà a rappresentare il vincolo di copertura
+    GRBLinExpr vincoloDiCopertura = new GRBLinExpr();
 
-      for (int j = 0; j < xij[0].length; j++)
-      {
-        expr.addTerm(1, xij[i][j]);
+    // Aggiungo le variabili all'espressione lineare
+    for (int i = 0; i < M; i++) {
+      for (int j = 0; j < K; j++) {
+        vincoloDiCopertura.addTerm(P[i][j], x[i+j+(M-1)*j]);
+      }
+    }
+
+    // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione lineare (FORMA STANDARD)
+    /*vincoloCopertura.addTerm(-1, s[indiceSlack++]);
+    vincoloCopertura.addTerm(1, y[indiceAusiliarie++]);*/
+
+    // Aggiungo il vincolo con il termine noto al modello (FORMA NON STANDARD)
+    modello.addConstr(vincoloDiCopertura, GRB.GREATER_EQUAL, S, "Vincolo_di_copertura");
+
+    // Aggiungo il vincolo con il termine noto al modello (FORMA STANDARD)
+    /*modello.addConstr(vincoloDiCopertura, GRB.EQUAL, S, "Vincolo_di_copertura");*/
+  }
+
+  /**
+   * Metodo che crea e imposta ogni singola espressione lineare rappresentante il singolo vincolo di costo
+   *
+   * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
+   */
+  private static void impostaVincoliDiCosto() throws GRBException {
+    for (int i = 0; i < M; i++) {
+      // Creo un'espressioni lineare che andrà a rappresentare il vincolo di costo
+      GRBLinExpr vincoloDiCosto = new GRBLinExpr();
+
+      // Aggiungo le variabili all'espressione lineare
+      for (int j = 0; j < K; j++) {
+        vincoloDiCosto.addTerm(C[i][j], x[i+j+(M-1)*j]);
       }
 
-      //se voglio risolvere la forma standard
-      //expr.addTerm(1.0, s[i]);
+      // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione lineare (FORMA STANDARD)
+      /*vincoloCosto.addTerm(1, s[indiceSlack++]);
+      vincoloCosto.addTerm(1, y[indiceAusiliarie++]);*/
 
-      //se voglio risolvere il problema artificale della I fase
-      //expr.addTerm(1.0, y[i]);
+      // Aggiungo il vincolo con il termine noto al modello (FORMA NON STANDARD)
+      modello.addConstr(vincoloDiCosto, GRB.LESS_EQUAL, beta[i], "Vincolo_di_costo_" + i);
 
-      //vincolo forma standard
-      //model.addConstr(expr, GRB.EQUAL, produzione[i], "vincolo_produzione_i_"+i);
-
-      //vincolo no forma standard
-      model.addConstr(expr, GRB.LESS_EQUAL, produzione[i], "vincolo_produzione_i_"+i);
-
+      // Aggiungo il vincolo con il termine noto al modello (FORMA STANDARD)
+      /*modello.addConstr(vincoloCosto, GRB.EQUAL, beta[i], "Vincolo_di_costo_" + i);*/
     }
   }
 
-  private static void aggiungiVincoliDomanda(GRBModel model, GRBVar[][] xij, GRBVar[] s, GRBVar [] y, int [] produzione, int[] domanda) throws GRBException
-  {
-    for (int j = 0; j < domanda.length; j++)
-    {
-      GRBLinExpr expr = new GRBLinExpr();
+  /**
+   * Metodo che crea e imposta ogni singola espressione lineare rappresentante il singolo vincolo di bilancio
+   *
+   * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
+   */
+  private static void impostaVincoliDiBilancio() throws GRBException {
+    // Creo un double che andrà a rappresentare il termine noto dei vincoli
+    double termineNoto = 0.0;
 
-      for (int i = 0; i < xij.length; i++)
-      {
-        expr.addTerm(1, xij[i][j]);
+    // Calcolo il termine noto dei vincoli di bilancio
+    for (int i = 0; i < M; i++) {
+      termineNoto += beta[i];
+    }
+    termineNoto *= omega;
+
+    for (int j = 0; j < K; j++) {
+      // Creo un'espressioni lineare che andrà a rappresentare il vincolo di bilancio
+      GRBLinExpr vincoloDiBilancio= new GRBLinExpr();
+
+      // Aggiungo le variabili all'espressione lineare
+      for (int i = 0; i < M; i++) {
+        vincoloDiBilancio.addTerm(C[i][j], x[i+j+(M-1)*j]);
       }
 
-      //se voglio risolvere la forma standard
-      //expr.addTerm(-1.0, s[produzione.length + j]);
+      // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione lineare (FORMA STANDARD)
+      /*vincoloConcorrenza.addTerm(-1, s[indiceSlack++]);
+      vincoloConcorrenza.addTerm(1, y[indiceAusiliarie++]);*/
 
-      //se voglio risolvere il problema artificale della I fase
-      //expr.addTerm(1.0, y[produzione.length + j]);
+      // Aggiungo il vincolo con il termine noto al modello (FORMA NON STANDARD)
+      modello.addConstr(vincoloDiBilancio, GRB.GREATER_EQUAL, termineNoto, "Vincolo_di_budget_" + j);
 
-      //vincolo no forma standard
-      //model.addConstr(expr, GRB.EQUAL, domanda[j], "vincolo_domanda_j_"+j);
-
-      //vincolo no forma standard
-      model.addConstr(expr, GRB.GREATER_EQUAL, domanda[j], "vincolo_domanda_j_"+j);
+      // Aggiungo il vincolo con il termine noto al modello (FORMA STANDARD)
+      /*modello.addConstr(vincoloDiBilancio, GRB.EQUAL, termineNoto, "Vincolo_di_budget_" + j);*/
     }
   }
 
-  private static void risolvi(GRBModel model) throws GRBException
-  {
-    model.optimize();
+  /**
+   * Metodo che crea e imposta ogni singola espressione lineare rappresentante il singolo vincolo di tempo
+   *
+   * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
+   */
+  private static void impostaVincoliDiTempo() throws GRBException {
+    for (int j = 0; j < K; j++) {
+      for (int i = 0; i < M; i++) {
+        // Creo un'espressione lineare che andrà a rappresentare il vincolo di tempo
+        GRBLinExpr vincoloTempo = new GRBLinExpr();
 
-    int status = model.get(GRB.IntAttr.Status);
+        // Aggiungo la variabile all'espressione lineare
+        vincoloTempo.addTerm(1, x[i+j+(M-1)*j]);
 
-    System.out.println("\n\n\nStato Ottimizzazione: "+ status + "\n");
-    // 2 soluzione ottima trovata
-    // 3 non esiste soluzione ammissibile (infeasible)
-    // 5 soluzione illimitata
-    // 9 tempo limite raggiunto
+        // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione lineare (FORMA STANDARD)
+        /*vincoloTempo.addTerm(1, s[indiceSlack++]);
+        vincoloTempo.addTerm(1, y[indiceAusiliarie++]);*/
 
-    /*TODO
-     * Una volta risolto il problema artificale P^ associato alla I fase, come posso sapere
-     * quale è il valore della funzione obiettivo del problema originale in corrispondenza
-     * dell'ottimo di P^? La soluzione è già ottima per il problema originale?
-     */
+        // Aggiungo il vincolo con il termine noto al modello (FORMA NON STANDARD)
+        modello.addConstr(vincoloTempo, GRB.LESS_EQUAL, tau[i][j], "Vincolo_di_tempo_" + i + "" + j);
 
-    for(GRBVar var : model.getVars())
-    {
-      //stampo il valore delle variabili e i costi ridotti associati all'ottimo
-      System.out.println(var.get(StringAttr.VarName)+ ": "+ var.get(DoubleAttr.X) + " RC = " + var.get(DoubleAttr.RC));
+        // Aggiungo il vincolo con il termine noto al modello (FORMA STANDARD)
+        /*modello.addConstr(vincoloTempo, GRB.EQUAL, tau[i][j], "Vincolo_di_tempo_" + i + "" + j);*/
+      }
     }
-
-    //per stamapre a video il valore ottimo delle slack/surplus del problema
-//		for(GRBConstr c: model.getConstrs())
-//		{
-//			System.out.println(c.get(StringAttr.ConstrName)+ ": "+ c.get(DoubleAttr.Slack));
-//			//Per gurobi SLACK vuol dire sia slack che surplus
-//		}
-
   }
 
+  private static void calcolaEStampa() throws GRBException {
+    modello.update();
+    modello.optimize();
+    modello.write("App.lp");
+
+    System.out.println("\n\nGRUPPO 81\nComponenti: Brignoli Muscio\n\nQUESITO I:");
+    System.out.println("funzione obbiettivo = " + ottieniValoreFunzioneObbiettivo());
+    System.out.println("copertura raggiunta totale (spettatori) = " + calcolaCoperturaRaggiuntaTotale());
+    System.out.println("tempo acquistato (minuti) = " + calcolaTempoAcquistato());
+    System.out.println("budget inutilizzato = " + calcolaBilancioInutilizzato());
+    System.out.print("soluzione di base ottima:\n" + ottieniSoluzioneDiBaseOttima());
+  }
+
+  /**
+   * Metodo per ottenere il valore della funzione obbiettivo
+   *
+   * @return Una <code>String</code> rappresentante il valore della funzione obbiettivo con quattro cifre decimali
+   * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
+   */
+  private static String ottieniValoreFunzioneObbiettivo() throws GRBException {
+    return String.format("%.4f", modello.get(GRB.DoubleAttr.ObjVal));
+  }
+
+  /**
+   * Metodo per calcolare e ottenere il valore della copertura totale di spettatori raggiunta
+   *
+   * @return Una <code>String</code> rappresentante il valore della copertura totale di spettatori raggiunta con quattro cifre decimali
+   * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
+   */
+  private static String calcolaCoperturaRaggiuntaTotale() throws GRBException {
+    int i = 0, j = 0;
+    double coperturaRaggiuntaTotale = 0.0;
+
+    for (GRBVar x : modello.getVars()) {
+      String nome = x.get(GRB.StringAttr.VarName);
+      double valore = x.get(GRB.DoubleAttr.X);
+
+      if(nome.contains("x")) {
+        coperturaRaggiuntaTotale += P[i][j]*valore;
+
+        i++;
+        if(i == M) {
+          i = 0;
+          j++;
+        }
+      }
+    }
+
+    return String.format("%.4f", coperturaRaggiuntaTotale);
+  }
+
+  /**
+   * Metodo per calcolare e ottenere il valore del tempo acquistato dalle varie emittenti
+   *
+   * @return Una <code>String</code> rappresentante il valore del tempo acquistato con quattro cifre decimali
+   * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
+   */
+  private static String calcolaTempoAcquistato() throws GRBException {
+    double tempoAcquistato = 0.0;
+
+    for (GRBVar x : modello.getVars()) {
+      String nome = x.get(GRB.StringAttr.VarName);
+      double valore = x.get(GRB.DoubleAttr.X);
+
+      if(nome.contains("x")) {
+        tempoAcquistato += valore;
+      }
+    }
+
+    return String.format("%.4f", tempoAcquistato);
+  }
+
+  /**
+   * Metodo per calcolare e ottenere il valore del bilancio inutilizzato
+   *
+   * @return Una <code>String</code> rappresentante il valore del bilancio inutilizzato con quattro cifre decimali
+   * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
+   */
+  private static String calcolaBilancioInutilizzato() throws GRBException {
+    int bilancioTotale = 0, bilancioUtilizzato = 0, i = 0, j = 0;
+
+    for (int bilancio : beta) {
+      bilancioTotale += bilancio;
+    }
+
+    for (GRBVar x : modello.getVars()) {
+      String name = x.get(GRB.StringAttr.VarName);
+      double value = x.get(GRB.DoubleAttr.X);
+
+      if(name.contains("x")) {
+        bilancioUtilizzato += C[i][j]*value;
+
+        i++;
+        if(i == M) {
+          i = 0;
+          j++;
+        }
+      }
+    }
+
+    return String.format("%d", bilancioTotale - bilancioUtilizzato);
+  }
+
+  /**
+   * Metodo per calcolare e ottenere tutti i nomi e i valori delle variabili che formano la soluzione di base ottima
+   *
+   * @return Una <code>String</code> rappresentante tutti i nomi e i valori delle variabili che formano la soluzione di base ottima
+   * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
+   */
+  private static String ottieniSoluzioneDiBaseOttima() throws GRBException {
+    StringBuilder soluzioneDiBaseOttima = new StringBuilder();
+
+    for (GRBVar x : modello.getVars()) {
+      String nome = x.get(GRB.StringAttr.VarName);
+      double valore = x.get(GRB.DoubleAttr.X);
+
+      soluzioneDiBaseOttima.append(String.format("%s = %.4f\n", nome, valore));
+    }
+
+    return  soluzioneDiBaseOttima.toString();
+  }
 }
