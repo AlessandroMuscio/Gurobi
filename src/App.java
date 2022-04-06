@@ -328,11 +328,13 @@ public class App {
     System.out.println("budget inutilizzato = " + calcolaBilancioInutilizzato());
     System.out.print("soluzione di base ottima:\n" + ottieniSoluzioneDiBaseOttima());
 
-    System.out.println("QUESITO II:\nvariabili in base: [" + ottieniVariabiliInBase() + "]");
-    System.out.println("coefficienti di costo ridotto: [" + ottieneCCR() + "]");
+    System.out.println("\nQUESITO II:");
+    System.out.println("variabili in base: " + variabiliBase());
+    System.out.println("coefficienti di costo ridotto: " + costoRidotto());
     System.out.println("soluzione ottima multipla: " + soluzioneMultipla());
     System.out.println("soluzione ottima degenere: " + soluzioneDegenere());
     System.out.println("vincoli vertice ottimo:" + vincoliVerticeOttimo());
+
   }
 
   /**
@@ -450,17 +452,20 @@ public class App {
    * @return Una <code>String</code> rappresentante tutte le variabili in base del modello
    * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
    */
-  private static String ottieniVariabiliInBase() throws GRBException {
-    StringBuilder variabiliInBase = new StringBuilder();
+  public static String variabiliBase() throws GRBException {
 
-    for (GRBVar x : modello.getVars()) {
-      double inBase = x.get(GRB.IntAttr.VBasis);
+    StringBuilder variabiliBase = new StringBuilder();
+    String [] base = ottieniVariabiliBase();
 
-      variabiliInBase.append(inBase == GRB.BASIC ? "1" : "0");
-      variabiliInBase.append(", ");
+    variabiliBase.append("[");
+
+    for(int i=0; i<base.length-1;i++) {
+      variabiliBase.append(String.format("%s, ", base[i]));
     }
 
-    return variabiliInBase.toString().substring(0, variabiliInBase.length()-2);
+    variabiliBase.append(String.format("%s]", base[base.length-1]));
+
+    return variabiliBase.toString();
   }
 
   /**
@@ -469,16 +474,20 @@ public class App {
    * @return Una <code>String</code> rappresentante tutti i coefficienti di costo ridotto delle variabili del modello
    * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
    */
-  private static String ottieneCCR() throws GRBException {
-    StringBuilder ccrBuilder = new StringBuilder();
+  public static String costoRidotto() throws GRBException {
 
-    for (GRBVar x : modello.getVars()) {
-      double ccr = x.get(GRB.DoubleAttr.RC);
+    StringBuilder costoRidotto = new StringBuilder();
+    GRBVar[] variabili = modello.getVars();
 
-      ccrBuilder.append(String.format("%.4f, ", ccr));
+    costoRidotto.append("[");
+
+    for(int i = 0; i < variabili.length-1; i++) {
+      costoRidotto.append(String.format("%.4f, ", variabili[i].get(GRB.DoubleAttr.RC)));
     }
 
-    return ccrBuilder.toString().substring(0, ccrBuilder.length()-2);
+    costoRidotto.append(String.format("%.4f]", variabili[variabili.length-1].get(GRB.DoubleAttr.RC)));
+
+    return costoRidotto.toString();
   }
 
   public static String soluzioneMultipla() throws GRBException {
@@ -489,7 +498,7 @@ public class App {
     int[] base = ottieniVariabiliBaseInt();
 
     for(i = 0; i < modello.getVars().length; i++) {
-      if(base[i] == 1 && Math.abs(modello.getVar(i).get(GRB.DoubleAttr.RC))<epsilon) {
+      if(base[i] == 0 && Math.abs(modello.getVar(i).get(GRB.DoubleAttr.RC)) < epsilon) {
         count++;
       }
     }
@@ -510,8 +519,10 @@ public class App {
 
 
     for(i = 0; i < modello.getVars().length; i++) {
-      if (var_in_base[i] == 0 && Math.abs(modello.getVar(i).get(GRB.DoubleAttr.X)) < epsilon){
+      if (var_in_base[i] == 1 && Math.abs(modello.getVar(i).get(GRB.DoubleAttr.X)) < epsilon){
         count++;
+
+        System.out.println(modello.getVar(i).get(GRB.StringAttr.VarName) + " " + modello.getVar(i).get(GRB.DoubleAttr.X));
       }
     }
 
@@ -564,4 +575,5 @@ public class App {
 
     return variabiliBase;
   }
+
 }
