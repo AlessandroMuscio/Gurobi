@@ -12,7 +12,6 @@
 import gurobi.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Classe principale contenete l'intero modello, non che il suo svolgimento
@@ -113,6 +112,9 @@ public class App {
    */
 
   // Variabili di utilità
+  /**
+   * Valore epsilon per i confronti tra <code>double</code>
+   */
   private static final double epsilon = 1e-5;
 
   public static void main(String[] args) {
