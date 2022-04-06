@@ -11,6 +11,9 @@
 
 import gurobi.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 /**
  * Classe principale contenete l'intero modello, non che il suo svolgimento
  */
@@ -50,7 +53,7 @@ public class App {
                                       {3, 2, 2, 2, 3, 3, 1, 2},
                                       {3, 3, 3, 2, 2, 2, 3, 3}};
   /**
-   * Variabile che rappresenta il costo, in €, al minuto per emittente in ogni fascia oraria
+   * Variabile che rappresenta il costo, in € al minuto, per emittente in ogni fascia oraria
    */
   private static final int[][] C = {{1400, 1198, 1272, 1082,  936, 1130, 1280, 1249},
                                     {1069, 1358, 1194, 1227, 1344,  975, 1206, 1021},
@@ -94,7 +97,7 @@ public class App {
    */
   private static final GRBVar[] y = new GRBVar[M+K+3+(M*K)];
   /**
-   * Variabile che rappresenta la funzione obbiettivo del modello
+   * Variabile che rappresenta la funzione obiettivo del modello
    */
   private static GRBVar a;
 
@@ -113,7 +116,7 @@ public class App {
       
       inizializzaVariabili();
 
-      impostaFunzioneObbiettivo();
+      impostaFunzioneObiettivo();
 
       impostaVincoliDiModulo();
       impostaVincoliDiCopertura();
@@ -153,16 +156,17 @@ public class App {
    *
    * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
    */
-  private static void impostaFunzioneObbiettivo() throws GRBException {
-    GRBLinExpr funzioneObiettivo = new GRBLinExpr(); // Creo un'espressione lineare che andrà a rappresentare la mia funzione obbiettivo
+  private static void impostaFunzioneObiettivo() throws GRBException {
+    // Creo un'espressione lineare che andrà a rappresentare la mia funzione obiettivo
+    GRBLinExpr funzioneObiettivo = new GRBLinExpr();
 
-    funzioneObiettivo.addTerm(1, a); // Aggiungo il termine 'a' alla funzione obbiettivo
+    funzioneObiettivo.addTerm(1, a); // Aggiungo il termine 'a' alla funzione obiettivo
 
-    modello.setObjective(funzioneObiettivo, GRB.MINIMIZE); // Imposto come funzione obbiettivo del modello l'espressione lineare creata dicendo che voglio minimizzarla
+    modello.setObjective(funzioneObiettivo, GRB.MINIMIZE); // Imposto come funzione obiettivo del modello l'espressione lineare creata dicendo che voglio minimizzarla
   }
 
   /**
-   * Metodo che crea e imposta le due espressioni lineari rappresentanti i due vincoli di moduli
+   * Metodo che crea e imposta le due espressioni lineari rappresentanti i due vincoli derivanti dall'espressione dello scarto (modulo della differenza)
    *
    * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
    */
@@ -179,7 +183,7 @@ public class App {
       }
     }
 
-    // Aggiungo le variabili di slack/surplus e quelle ausiliarie alle rispettive espressioni lineari (FORMA STANDARD)
+    // Aggiungo le variabili di slack/surplus e quelle ausiliarie alle rispettive espressioni lineari (solo FORMA STANDARD)
     /*vincoloModulo0.addTerm(1, s[indiceSlack++]);
     vincoloModulo0.addTerm(1, y[indiceAusiliarie++]);
 
@@ -190,7 +194,7 @@ public class App {
     modello.addConstr(vincoloDiModulo0, GRB.LESS_EQUAL, a, "Vincolo_di_modulo_0");
     modello.addConstr(vincoloDiModulo1, GRB.LESS_EQUAL, a, "Vincolo_di_modulo_1");
 
-    // Aggiungo i vincoli con il termine noto al modello (FORMA STANDARD)
+    // Aggiungo i vincoli con il termine noto al modello (solo FORMA STANDARD)
     /*modello.addConstr(vincoloModulo0, GRB.EQUAL, a, "Vincolo_di_modulo_0");
     modello.addConstr(vincoloModulo1, GRB.EQUAL, a, "Vincolo_di_modulo_1");*/
   }
@@ -299,7 +303,7 @@ public class App {
         // Aggiungo la variabile all'espressione lineare
         vincoloTempo.addTerm(1, x[i+j+(M-1)*j]);
 
-        // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione lineare (FORMA STANDARD)
+        // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione lineare (solo FORMA STANDARD)
         /*vincoloTempo.addTerm(1, s[indiceSlack++]);
         vincoloTempo.addTerm(1, y[indiceAusiliarie++]);*/
 
@@ -326,6 +330,9 @@ public class App {
 
     System.out.println("QUESITO II:\nvariabili in base: [" + ottieniVariabiliInBase() + "]");
     System.out.println("coefficienti di costo ridotto: [" + ottieneCCR() + "]");
+    System.out.println("soluzione ottima multipla: " + soluzioneMultipla());
+    System.out.println("soluzione ottima degenere: " + soluzioneDegenere());
+    System.out.println("vincoli vertice ottimo:" + vincoliVerticeOttimo());
   }
 
   /**
@@ -419,7 +426,7 @@ public class App {
   }
 
   /**
-   * Metodo per calcolare e ottenere tutti i nomi e i valori delle variabili che formano la soluzione di base ottima
+   * Metodo per ottenere tutti i nomi e i valori delle variabili che formano la soluzione di base ottima
    *
    * @return Una <code>String</code> rappresentante tutti i nomi e i valori delle variabili che formano la soluzione di base ottima
    * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
@@ -472,5 +479,89 @@ public class App {
     }
 
     return ccrBuilder.toString().substring(0, ccrBuilder.length()-2);
+  }
+
+  public static String soluzioneMultipla() throws GRBException {
+
+    int i = 0, count = 0;
+    double epsilon = 1e-5;
+    boolean multipla = false;
+    int[] base = ottieniVariabiliBaseInt();
+
+    for(i = 0; i < modello.getVars().length; i++) {
+      if(base[i] == 1 && Math.abs(modello.getVar(i).get(GRB.DoubleAttr.RC))<epsilon) {
+        count++;
+      }
+    }
+
+    if(count>0) {        //ho delle var/slack in base a 0
+      multipla = true;
+    }
+
+    return (multipla ? "<Sì>" : "<No>");
+  }
+
+  public static String soluzioneDegenere() throws GRBException {
+
+    int count = 0, i = 0;
+    boolean degenere = false;
+    double epsilon = 1e-5;
+    int[] var_in_base = ottieniVariabiliBaseInt();
+
+
+    for(i = 0; i < modello.getVars().length; i++) {
+      if (var_in_base[i] == 0 && Math.abs(modello.getVar(i).get(GRB.DoubleAttr.X)) < epsilon){
+        count++;
+      }
+    }
+
+    if(count > 0) {               //ho delle var/slack in base a 0
+      degenere = true;
+    }
+
+    return (degenere ? "<Sì>" : "<No>");
+  }
+
+  public static String vincoliVerticeOttimo() throws GRBException {
+
+    double epsilon = 1e-5;
+    ArrayList<String> vincoliVerticeOttimo = new ArrayList<>();
+
+    for(var v : modello.getConstrs()) {
+      if(Math.abs(v.get(GRB.DoubleAttr.Slack)) < epsilon)
+        vincoliVerticeOttimo.add(v.get(GRB.StringAttr.ConstrName));
+    }
+
+    return Arrays.toString(vincoliVerticeOttimo.toArray());
+  }
+
+  public static String[] ottieniVariabiliBase() throws GRBException {
+
+    String[] variabiliBase = new String[modello.getVars().length];
+    int i = 0;
+
+    /*//variabili con nome
+    for (var v : modello.getVars()){
+      variabiliBase[i++] = (v.get(GRB.IntAttr.VBasis) == GRB.BASIC ? String.format("%s = 1", v.get(GRB.StringAttr.VarName)) : String.format("%s = 0", v.get(GRB.StringAttr.VarName)));
+    }*/
+
+    //variabili
+    for (var v : modello.getVars()){
+      variabiliBase[i++] = (v.get(GRB.IntAttr.VBasis) == GRB.BASIC ? "1" : "0");
+    }
+
+    return variabiliBase;
+  }
+
+  public static int[] ottieniVariabiliBaseInt() throws GRBException {
+
+    int[] variabiliBase = new int[modello.getVars().length];
+    int i = 0;
+
+    for (var v : modello.getVars()){
+      variabiliBase[i++] = (v.get(GRB.IntAttr.VBasis) == GRB.BASIC ? 1 : 0);
+    }
+
+    return variabiliBase;
   }
 }
