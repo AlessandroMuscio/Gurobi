@@ -1,0 +1,59 @@
+/**
+   * Variabile che rappresenta il numero di emittenti televisive
+   */
+  private static final int M = 10;
+  /**
+   * Variabile che rappresenta il numero di fasce orarie in una giornata
+   */
+  private static final int K = 8;
+  /**
+   * Variabile che rappresenta il minimo numero di spettatori giornalieri da raggiungere
+   */
+  private static final int S = 82110;
+  /**
+   * Variabile che rappresenta la percentuale minima di bilancio da spendere per emittente sul bilancio totale
+   */
+  private static final double omega = 0.02;
+  /**
+   * Variabile che rappresenta il massimo bilancio spendibile per emittente
+   */
+  private static final int[] beta = {3373, 3281, 3274, 3410, 2691, 2613, 3354, 2912, 3203, 2616};
+  /**
+   * Variabile che rappresenta il numero massimo di minuti acquistabili da ogni emittente per fascia oraria
+   */
+  private static final int[][] tau = {{2, 2, 2, 1, 2, 2, 1, 3},
+                                      {2, 2, 1, 2, 2, 2, 2, 3},
+                                      {2, 2, 2, 2, 3, 1, 2, 1},
+                                      {2, 2, 2, 1, 1, 3, 2, 1},
+                                      {2, 1, 3, 2, 3, 2, 2, 1},
+                                      {2, 1, 2, 2, 2, 3, 3, 2},
+                                      {3, 3, 1, 1, 2, 1, 2, 2},
+                                      {3, 3, 2, 2, 2, 1, 3, 2},
+                                      {3, 2, 2, 2, 3, 3, 1, 2},
+                                      {3, 3, 3, 2, 2, 2, 3, 3}};
+  /**
+   * Variabile che rappresenta il costo, in € al minuto, per emittente in ogni fascia oraria
+   */
+  private static final int[][] C = {{1400, 1198, 1272, 1082,  936, 1130, 1280, 1249},
+                                    {1069, 1358, 1194, 1227, 1344,  975, 1206, 1021},
+                                    {1285,  964, 1342,  924, 1286, 1298, 1320,  925},
+                                    { 911, 1052,  959, 1149, 1170, 1363, 1296, 1002},
+                                    {1121, 1211,  988, 1168, 1175, 1037, 1066, 1221},
+                                    { 929,  971, 1144, 1257, 1103, 1208, 1125, 1305},
+                                    {1345, 1103, 1349, 1213, 1101, 1283, 1303,  928},
+                                    {1385, 1136,  975, 1239, 1179, 1140, 1387, 1282},
+                                    { 918, 1054, 1281, 1337,  935, 1119, 1210, 1132},
+                                    {1133, 1302,  927, 1179, 1027, 1207, 1150, 1088}};
+  /**
+   * Variabile che rappresenta il numero di spettatori al minuto per emittente in ogni fascia oraria
+   */
+  private static final int[][] P = {{2890, 1584, 2905, 2465, 1128, 2285, 3204, 1009},
+                                    {3399,  355, 2070,  905,  814,  772, 2502, 2780},
+                                    { 590, 2861,  744, 3245, 2846, 2545, 2584,  633},
+                                    {1332, 2682, 3264, 1558, 1162,  414, 1004, 1580},
+                                    { 674, 1122, 1333, 1205, 3319, 2519, 2827, 1852},
+                                    {2481, 1761, 2079, 1197, 3223, 3478, 2767, 1462},
+                                    {1740, 3204, 2644, 3302,  474, 2765, 2296, 2376},
+                                    {3471, 1593, 2726, 1921, 1841, 1191, 2294, 1642},
+                                    { 900, 3035, 2951, 1440,  852, 1842,  307, 3189},
+                                    {2104,  389, 3188,  365, 1931, 2563, 2770, 1844}};
