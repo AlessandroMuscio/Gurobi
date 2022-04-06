@@ -18,7 +18,7 @@ import java.util.Arrays;
  * Classe principale contenete l'intero modello, non che il suo svolgimento
  */
 public class App {
-  //Variabili del problema
+  // Variabili del problema
   /**
    * Variabile che rappresenta il numero di emittenti televisive
    */
@@ -28,58 +28,63 @@ public class App {
    */
   private static final int K = 8;
   /**
-   * Variabile che rappresenta il minimo numero di spettatori giornalieri da raggiungere
+   * Variabile che rappresenta il minimo numero di spettatori giornalieri da
+   * raggiungere
    */
   private static final int S = 82110;
   /**
-   * Variabile che rappresenta la percentuale minima di bilancio da spendere per emittente sul bilancio totale
+   * Variabile che rappresenta la percentuale minima di bilancio da spendere per
+   * emittente sul bilancio totale
    */
   private static final double omega = 0.02;
   /**
    * Variabile che rappresenta il massimo bilancio spendibile per emittente
    */
-  private static final int[] beta = {3373, 3281, 3274, 3410, 2691, 2613, 3354, 2912, 3203, 2616};
+  private static final int[] beta = { 3373, 3281, 3274, 3410, 2691, 2613, 3354, 2912, 3203, 2616 };
   /**
-   * Variabile che rappresenta il numero massimo di minuti acquistabili da ogni emittente per fascia oraria
+   * Variabile che rappresenta il numero massimo di minuti acquistabili da ogni
+   * emittente per fascia oraria
    */
-  private static final int[][] tau = {{2, 2, 2, 1, 2, 2, 1, 3},
-                                      {2, 2, 1, 2, 2, 2, 2, 3},
-                                      {2, 2, 2, 2, 3, 1, 2, 1},
-                                      {2, 2, 2, 1, 1, 3, 2, 1},
-                                      {2, 1, 3, 2, 3, 2, 2, 1},
-                                      {2, 1, 2, 2, 2, 3, 3, 2},
-                                      {3, 3, 1, 1, 2, 1, 2, 2},
-                                      {3, 3, 2, 2, 2, 1, 3, 2},
-                                      {3, 2, 2, 2, 3, 3, 1, 2},
-                                      {3, 3, 3, 2, 2, 2, 3, 3}};
+  private static final int[][] tau = { { 2, 2, 2, 1, 2, 2, 1, 3 },
+      { 2, 2, 1, 2, 2, 2, 2, 3 },
+      { 2, 2, 2, 2, 3, 1, 2, 1 },
+      { 2, 2, 2, 1, 1, 3, 2, 1 },
+      { 2, 1, 3, 2, 3, 2, 2, 1 },
+      { 2, 1, 2, 2, 2, 3, 3, 2 },
+      { 3, 3, 1, 1, 2, 1, 2, 2 },
+      { 3, 3, 2, 2, 2, 1, 3, 2 },
+      { 3, 2, 2, 2, 3, 3, 1, 2 },
+      { 3, 3, 3, 2, 2, 2, 3, 3 } };
   /**
-   * Variabile che rappresenta il costo, in € al minuto, per emittente in ogni fascia oraria
+   * Variabile che rappresenta il costo, in € al minuto, per emittente in ogni
+   * fascia oraria
    */
-  private static final int[][] C = {{1400, 1198, 1272, 1082,  936, 1130, 1280, 1249},
-                                    {1069, 1358, 1194, 1227, 1344,  975, 1206, 1021},
-                                    {1285,  964, 1342,  924, 1286, 1298, 1320,  925},
-                                    { 911, 1052,  959, 1149, 1170, 1363, 1296, 1002},
-                                    {1121, 1211,  988, 1168, 1175, 1037, 1066, 1221},
-                                    { 929,  971, 1144, 1257, 1103, 1208, 1125, 1305},
-                                    {1345, 1103, 1349, 1213, 1101, 1283, 1303,  928},
-                                    {1385, 1136,  975, 1239, 1179, 1140, 1387, 1282},
-                                    { 918, 1054, 1281, 1337,  935, 1119, 1210, 1132},
-                                    {1133, 1302,  927, 1179, 1027, 1207, 1150, 1088}};
+  private static final int[][] C = { { 1400, 1198, 1272, 1082, 936, 1130, 1280, 1249 },
+      { 1069, 1358, 1194, 1227, 1344, 975, 1206, 1021 },
+      { 1285, 964, 1342, 924, 1286, 1298, 1320, 925 },
+      { 911, 1052, 959, 1149, 1170, 1363, 1296, 1002 },
+      { 1121, 1211, 988, 1168, 1175, 1037, 1066, 1221 },
+      { 929, 971, 1144, 1257, 1103, 1208, 1125, 1305 },
+      { 1345, 1103, 1349, 1213, 1101, 1283, 1303, 928 },
+      { 1385, 1136, 975, 1239, 1179, 1140, 1387, 1282 },
+      { 918, 1054, 1281, 1337, 935, 1119, 1210, 1132 },
+      { 1133, 1302, 927, 1179, 1027, 1207, 1150, 1088 } };
   /**
-   * Variabile che rappresenta il numero di spettatori al minuto per emittente in ogni fascia oraria
+   * Variabile che rappresenta il numero di spettatori al minuto per emittente in
+   * ogni fascia oraria
    */
-  private static final int[][] P = {{2890, 1584, 2905, 2465, 1128, 2285, 3204, 1009},
-                                    {3399,  355, 2070,  905,  814,  772, 2502, 2780},
-                                    { 590, 2861,  744, 3245, 2846, 2545, 2584,  633},
-                                    {1332, 2682, 3264, 1558, 1162,  414, 1004, 1580},
-                                    { 674, 1122, 1333, 1205, 3319, 2519, 2827, 1852},
-                                    {2481, 1761, 2079, 1197, 3223, 3478, 2767, 1462},
-                                    {1740, 3204, 2644, 3302,  474, 2765, 2296, 2376},
-                                    {3471, 1593, 2726, 1921, 1841, 1191, 2294, 1642},
-                                    { 900, 3035, 2951, 1440,  852, 1842,  307, 3189},
-                                    {2104,  389, 3188,  365, 1931, 2563, 2770, 1844}};
+  private static final int[][] P = { { 2890, 1584, 2905, 2465, 1128, 2285, 3204, 1009 },
+      { 3399, 355, 2070, 905, 814, 772, 2502, 2780 },
+      { 590, 2861, 744, 3245, 2846, 2545, 2584, 633 },
+      { 1332, 2682, 3264, 1558, 1162, 414, 1004, 1580 },
+      { 674, 1122, 1333, 1205, 3319, 2519, 2827, 1852 },
+      { 2481, 1761, 2079, 1197, 3223, 3478, 2767, 1462 },
+      { 1740, 3204, 2644, 3302, 474, 2765, 2296, 2376 },
+      { 3471, 1593, 2726, 1921, 1841, 1191, 2294, 1642 },
+      { 900, 3035, 2951, 1440, 852, 1842, 307, 3189 },
+      { 2104, 389, 3188, 365, 1931, 2563, 2770, 1844 } };
 
-  //Variabili di Gurobi
+  // Variabili di Gurobi
   /**
    * Variabile che rappresenta il modello del problema
    */
@@ -87,23 +92,28 @@ public class App {
   /**
    * Variabile che rappresenta le incognite del modello
    */
-  private static final GRBVar[] x = new GRBVar[M*K];
+  private static final GRBVar[] x = new GRBVar[M * K];
   /**
    * Variabile che rappresenta le slack/surplus del modello
    */
-  private static final GRBVar[] s = new GRBVar[M+K+3+(M*K)];
+  private static final GRBVar[] s = new GRBVar[M + K + 3 + (M * K)];
   /**
    * Variabile che rappresenta le variabili ausiliarie del modello
    */
-  private static final GRBVar[] y = new GRBVar[M+K+3+(M*K)];
+  private static final GRBVar[] y = new GRBVar[M + K + 3 + (M * K)];
   /**
    * Variabile che rappresenta la funzione obiettivo del modello
    */
   private static GRBVar a;
 
   // Utilizzare per risolvere il modello in FORMA STANDARD
-  /*private static int indiceSlack = 0;
-  private static int indiceAusiliarie = 0;*/
+  /*
+   * private static int indiceSlack = 0;
+   * private static int indiceAusiliarie = 0;
+   */
+
+  // Variabili di utilità
+  private static final double epsilon = 1e-5;
 
   public static void main(String[] args) {
     try {
@@ -113,7 +123,7 @@ public class App {
       ambiente.set(GRB.IntParam.Method, 0); // Imposto l'utilizzo del simplesso semplice
 
       modello = new GRBModel(ambiente); // Creo un modello vuoto utilizzando l'ambiente precedentemente creato
-      
+
       inizializzaVariabili();
 
       impostaFunzioneObiettivo();
@@ -138,13 +148,14 @@ public class App {
   private static void inizializzaVariabili() throws GRBException {
     // Inizializzazione delle incognite del modello
     for (int i = 0; i < x.length; i++) {
-      x[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "x"+(i+1));
+      x[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "x" + (i + 1));
     }
 
     // Inizializzazione delle slack/surplus e delle variabili ausiliarie del modello
+
     for (int i = 0; i < s.length; i++) {
-      s[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "s"+(i+1));
-      y[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "y"+(i+1));
+      s[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "s" + (i + 1));
+      y[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "y" + (i + 1));
     }
 
     // Inizializzazione della funzione obbiettivo
@@ -152,21 +163,25 @@ public class App {
   }
 
   /**
-   * Metodo che crea un'espressione lineare che verrà impostata come funzione obbiettivo del modello
+   * Metodo che crea un'espressione lineare che verrà impostata come funzione
+   * obbiettivo del modello
    *
    * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
    */
   private static void impostaFunzioneObiettivo() throws GRBException {
-    // Creo un'espressione lineare che andrà a rappresentare la mia funzione obiettivo
+    // Creo un'espressione lineare che andrà a rappresentare la mia funzione
+    // obiettivo
     GRBLinExpr funzioneObiettivo = new GRBLinExpr();
 
     funzioneObiettivo.addTerm(1, a); // Aggiungo il termine 'a' alla funzione obiettivo
 
-    modello.setObjective(funzioneObiettivo, GRB.MINIMIZE); // Imposto come funzione obiettivo del modello l'espressione lineare creata dicendo che voglio minimizzarla
+    modello.setObjective(funzioneObiettivo, GRB.MINIMIZE); // Imposto come funzione obiettivo del modello l'espressione
+                                                           // lineare creata dicendo che voglio minimizzarla
   }
 
   /**
-   * Metodo che crea e imposta le due espressioni lineari rappresentanti i due vincoli derivanti dall'espressione dello scarto (modulo della differenza)
+   * Metodo che crea e imposta le due espressioni lineari rappresentanti i due
+   * vincoli derivanti dall'espressione dello scarto (modulo della differenza)
    *
    * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
    */
@@ -178,29 +193,35 @@ public class App {
     // Aggiungo le variabili alle rispettive espressioni lineari
     for (int j = 0; j < K; j++) {
       for (int i = 0; i < M; i++) {
-        vincoloDiModulo0.addTerm(j < K/2 ? P[i][j] : -P[i][j], x[i+j+(M-1)*j]);
-        vincoloDiModulo1.addTerm(j < K/2 ? -P[i][j] : P[i][j], x[i+j+(M-1)*j]);
+        vincoloDiModulo0.addTerm(j < K / 2 ? P[i][j] : -P[i][j], x[i + j + (M - 1) * j]);
+        vincoloDiModulo1.addTerm(j < K / 2 ? -P[i][j] : P[i][j], x[i + j + (M - 1) * j]);
       }
     }
 
-    // Aggiungo le variabili di slack/surplus e quelle ausiliarie alle rispettive espressioni lineari (solo FORMA STANDARD)
-    /*vincoloModulo0.addTerm(1, s[indiceSlack++]);
-    vincoloModulo0.addTerm(1, y[indiceAusiliarie++]);
-
-    vincoloModulo1.addTerm(1, s[indiceSlack++]);
-    vincoloModulo1.addTerm(1, y[indiceAusiliarie++]);*/
+    // Aggiungo le variabili di slack/surplus e quelle ausiliarie alle rispettive
+    // espressioni lineari (solo FORMA STANDARD)
+    /*
+     * vincoloModulo0.addTerm(1, s[indiceSlack++]);
+     * vincoloModulo0.addTerm(1, y[indiceAusiliarie++]);
+     * 
+     * vincoloModulo1.addTerm(1, s[indiceSlack++]);
+     * vincoloModulo1.addTerm(1, y[indiceAusiliarie++]);
+     */
 
     // Aggiungo i vincoli con il termine noto al modello (FORMA NON STANDARD)
     modello.addConstr(vincoloDiModulo0, GRB.LESS_EQUAL, a, "Vincolo_di_modulo_0");
     modello.addConstr(vincoloDiModulo1, GRB.LESS_EQUAL, a, "Vincolo_di_modulo_1");
 
     // Aggiungo i vincoli con il termine noto al modello (solo FORMA STANDARD)
-    /*modello.addConstr(vincoloModulo0, GRB.EQUAL, a, "Vincolo_di_modulo_0");
-    modello.addConstr(vincoloModulo1, GRB.EQUAL, a, "Vincolo_di_modulo_1");*/
+    /*
+     * modello.addConstr(vincoloModulo0, GRB.EQUAL, a, "Vincolo_di_modulo_0");
+     * modello.addConstr(vincoloModulo1, GRB.EQUAL, a, "Vincolo_di_modulo_1");
+     */
   }
 
   /**
-   * Metodo che crea e imposta l'espressione lineare rappresentante il vincolo di copertura
+   * Metodo che crea e imposta l'espressione lineare rappresentante il vincolo di
+   * copertura
    *
    * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
    */
@@ -211,23 +232,29 @@ public class App {
     // Aggiungo le variabili all'espressione lineare
     for (int i = 0; i < M; i++) {
       for (int j = 0; j < K; j++) {
-        vincoloDiCopertura.addTerm(P[i][j], x[i+j+(M-1)*j]);
+        vincoloDiCopertura.addTerm(P[i][j], x[i + j + (M - 1) * j]);
       }
     }
 
-    // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione lineare (FORMA STANDARD)
-    /*vincoloCopertura.addTerm(-1, s[indiceSlack++]);
-    vincoloCopertura.addTerm(1, y[indiceAusiliarie++]);*/
+    // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione
+    // lineare (FORMA STANDARD)
+    /*
+     * vincoloCopertura.addTerm(-1, s[indiceSlack++]);
+     * vincoloCopertura.addTerm(1, y[indiceAusiliarie++]);
+     */
 
     // Aggiungo il vincolo con il termine noto al modello (FORMA NON STANDARD)
     modello.addConstr(vincoloDiCopertura, GRB.GREATER_EQUAL, S, "Vincolo_di_copertura");
 
     // Aggiungo il vincolo con il termine noto al modello (FORMA STANDARD)
-    /*modello.addConstr(vincoloDiCopertura, GRB.EQUAL, S, "Vincolo_di_copertura");*/
+    /*
+     * modello.addConstr(vincoloDiCopertura, GRB.EQUAL, S, "Vincolo_di_copertura");
+     */
   }
 
   /**
-   * Metodo che crea e imposta ogni singola espressione lineare rappresentante il singolo vincolo di costo
+   * Metodo che crea e imposta ogni singola espressione lineare rappresentante il
+   * singolo vincolo di costo
    *
    * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
    */
@@ -238,23 +265,29 @@ public class App {
 
       // Aggiungo le variabili all'espressione lineare
       for (int j = 0; j < K; j++) {
-        vincoloDiCosto.addTerm(C[i][j], x[i+j+(M-1)*j]);
+        vincoloDiCosto.addTerm(C[i][j], x[i + j + (M - 1) * j]);
       }
 
-      // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione lineare (FORMA STANDARD)
-      /*vincoloCosto.addTerm(1, s[indiceSlack++]);
-      vincoloCosto.addTerm(1, y[indiceAusiliarie++]);*/
+      // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione
+      // lineare (FORMA STANDARD)
+      /*
+       * vincoloCosto.addTerm(1, s[indiceSlack++]);
+       * vincoloCosto.addTerm(1, y[indiceAusiliarie++]);
+       */
 
       // Aggiungo il vincolo con il termine noto al modello (FORMA NON STANDARD)
       modello.addConstr(vincoloDiCosto, GRB.LESS_EQUAL, beta[i], "Vincolo_di_costo_" + i);
 
       // Aggiungo il vincolo con il termine noto al modello (FORMA STANDARD)
-      /*modello.addConstr(vincoloCosto, GRB.EQUAL, beta[i], "Vincolo_di_costo_" + i);*/
+      /*
+       * modello.addConstr(vincoloCosto, GRB.EQUAL, beta[i], "Vincolo_di_costo_" + i);
+       */
     }
   }
 
   /**
-   * Metodo che crea e imposta ogni singola espressione lineare rappresentante il singolo vincolo di bilancio
+   * Metodo che crea e imposta ogni singola espressione lineare rappresentante il
+   * singolo vincolo di bilancio
    *
    * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
    */
@@ -270,27 +303,34 @@ public class App {
 
     for (int j = 0; j < K; j++) {
       // Creo un'espressioni lineare che andrà a rappresentare il vincolo di bilancio
-      GRBLinExpr vincoloDiBilancio= new GRBLinExpr();
+      GRBLinExpr vincoloDiBilancio = new GRBLinExpr();
 
       // Aggiungo le variabili all'espressione lineare
       for (int i = 0; i < M; i++) {
-        vincoloDiBilancio.addTerm(C[i][j], x[i+j+(M-1)*j]);
+        vincoloDiBilancio.addTerm(C[i][j], x[i + j + (M - 1) * j]);
       }
 
-      // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione lineare (FORMA STANDARD)
-      /*vincoloConcorrenza.addTerm(-1, s[indiceSlack++]);
-      vincoloConcorrenza.addTerm(1, y[indiceAusiliarie++]);*/
+      // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione
+      // lineare (FORMA STANDARD)
+      /*
+       * vincoloConcorrenza.addTerm(-1, s[indiceSlack++]);
+       * vincoloConcorrenza.addTerm(1, y[indiceAusiliarie++]);
+       */
 
       // Aggiungo il vincolo con il termine noto al modello (FORMA NON STANDARD)
       modello.addConstr(vincoloDiBilancio, GRB.GREATER_EQUAL, termineNoto, "Vincolo_di_budget_" + j);
 
       // Aggiungo il vincolo con il termine noto al modello (FORMA STANDARD)
-      /*modello.addConstr(vincoloDiBilancio, GRB.EQUAL, termineNoto, "Vincolo_di_budget_" + j);*/
+      /*
+       * modello.addConstr(vincoloDiBilancio, GRB.EQUAL, termineNoto,
+       * "Vincolo_di_budget_" + j);
+       */
     }
   }
 
   /**
-   * Metodo che crea e imposta ogni singola espressione lineare rappresentante il singolo vincolo di tempo
+   * Metodo che crea e imposta ogni singola espressione lineare rappresentante il
+   * singolo vincolo di tempo
    *
    * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
    */
@@ -301,17 +341,23 @@ public class App {
         GRBLinExpr vincoloTempo = new GRBLinExpr();
 
         // Aggiungo la variabile all'espressione lineare
-        vincoloTempo.addTerm(1, x[i+j+(M-1)*j]);
+        vincoloTempo.addTerm(1, x[i + j + (M - 1) * j]);
 
-        // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione lineare (solo FORMA STANDARD)
-        /*vincoloTempo.addTerm(1, s[indiceSlack++]);
-        vincoloTempo.addTerm(1, y[indiceAusiliarie++]);*/
+        // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione
+        // lineare (solo FORMA STANDARD)
+        /*
+         * vincoloTempo.addTerm(1, s[indiceSlack++]);
+         * vincoloTempo.addTerm(1, y[indiceAusiliarie++]);
+         */
 
         // Aggiungo il vincolo con il termine noto al modello (FORMA NON STANDARD)
         modello.addConstr(vincoloTempo, GRB.LESS_EQUAL, tau[i][j], "Vincolo_di_tempo_" + i + "" + j);
 
         // Aggiungo il vincolo con il termine noto al modello (FORMA STANDARD)
-        /*modello.addConstr(vincoloTempo, GRB.EQUAL, tau[i][j], "Vincolo_di_tempo_" + i + "" + j);*/
+        /*
+         * modello.addConstr(vincoloTempo, GRB.EQUAL, tau[i][j], "Vincolo_di_tempo_" + i
+         * + "" + j);
+         */
       }
     }
   }
@@ -329,7 +375,7 @@ public class App {
     System.out.print("soluzione di base ottima:\n" + ottieniSoluzioneDiBaseOttima());
 
     System.out.println("\nQUESITO II:");
-    System.out.println("variabili in base: " + variabiliBase());
+    System.out.println("variabili in base: " + ottieniVariabiliInBase());
     System.out.println("coefficienti di costo ridotto: " + costoRidotto());
     System.out.println("soluzione ottima multipla: " + soluzioneMultipla());
     System.out.println("soluzione ottima degenere: " + soluzioneDegenere());
@@ -340,7 +386,8 @@ public class App {
   /**
    * Metodo per ottenere il valore della funzione obbiettivo
    *
-   * @return Una <code>String</code> rappresentante il valore della funzione obbiettivo con quattro cifre decimali
+   * @return Una <code>String</code> rappresentante il valore della funzione
+   *         obbiettivo con quattro cifre decimali
    * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
    */
   private static String ottieniValoreFunzioneObbiettivo() throws GRBException {
@@ -348,9 +395,11 @@ public class App {
   }
 
   /**
-   * Metodo per calcolare e ottenere il valore della copertura totale di spettatori raggiunta
+   * Metodo per calcolare e ottenere il valore della copertura totale di
+   * spettatori raggiunta
    *
-   * @return Una <code>String</code> rappresentante il valore della copertura totale di spettatori raggiunta con quattro cifre decimali
+   * @return Una <code>String</code> rappresentante il valore della copertura
+   *         totale di spettatori raggiunta con quattro cifre decimali
    * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
    */
   private static String calcolaCoperturaRaggiuntaTotale() throws GRBException {
@@ -361,11 +410,11 @@ public class App {
       String nome = x.get(GRB.StringAttr.VarName);
       double valore = x.get(GRB.DoubleAttr.X);
 
-      if(nome.contains("x")) {
-        coperturaRaggiuntaTotale += P[i][j]*valore;
+      if (nome.contains("x")) {
+        coperturaRaggiuntaTotale += P[i][j] * valore;
 
         i++;
-        if(i == M) {
+        if (i == M) {
           i = 0;
           j++;
         }
@@ -376,9 +425,11 @@ public class App {
   }
 
   /**
-   * Metodo per calcolare e ottenere il valore del tempo acquistato dalle varie emittenti
+   * Metodo per calcolare e ottenere il valore del tempo acquistato dalle varie
+   * emittenti
    *
-   * @return Una <code>String</code> rappresentante il valore del tempo acquistato con quattro cifre decimali
+   * @return Una <code>String</code> rappresentante il valore del tempo acquistato
+   *         con quattro cifre decimali
    * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
    */
   private static String calcolaTempoAcquistato() throws GRBException {
@@ -388,7 +439,7 @@ public class App {
       String nome = x.get(GRB.StringAttr.VarName);
       double valore = x.get(GRB.DoubleAttr.X);
 
-      if(nome.contains("x")) {
+      if (nome.contains("x")) {
         tempoAcquistato += valore;
       }
     }
@@ -399,7 +450,8 @@ public class App {
   /**
    * Metodo per calcolare e ottenere il valore del bilancio inutilizzato
    *
-   * @return Una <code>String</code> rappresentante il valore del bilancio inutilizzato con quattro cifre decimali
+   * @return Una <code>String</code> rappresentante il valore del bilancio
+   *         inutilizzato con quattro cifre decimali
    * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
    */
   private static String calcolaBilancioInutilizzato() throws GRBException {
@@ -413,11 +465,11 @@ public class App {
       String name = x.get(GRB.StringAttr.VarName);
       double value = x.get(GRB.DoubleAttr.X);
 
-      if(name.contains("x")) {
-        bilancioUtilizzato += C[i][j]*value;
+      if (name.contains("x")) {
+        bilancioUtilizzato += C[i][j] * value;
 
         i++;
-        if(i == M) {
+        if (i == M) {
           i = 0;
           j++;
         }
@@ -428,9 +480,11 @@ public class App {
   }
 
   /**
-   * Metodo per ottenere tutti i nomi e i valori delle variabili che formano la soluzione di base ottima
+   * Metodo per ottenere tutti i nomi e i valori delle variabili che formano la
+   * soluzione di base ottima
    *
-   * @return Una <code>String</code> rappresentante tutti i nomi e i valori delle variabili che formano la soluzione di base ottima
+   * @return Una <code>String</code> rappresentante tutti i nomi e i valori delle
+   *         variabili che formano la soluzione di base ottima
    * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
    */
   private static String ottieniSoluzioneDiBaseOttima() throws GRBException {
@@ -443,21 +497,22 @@ public class App {
       soluzioneDiBaseOttima.append(String.format("%s = %.4f\n", nome, valore));
     }
 
-    return  soluzioneDiBaseOttima.toString();
+    return soluzioneDiBaseOttima.toString();
   }
 
   /**
    * Metodo per ottenere tutte le variabili in base del modello
    *
-   * @return Una <code>String</code> rappresentante tutte le variabili in base del modello
+   * @return Una <code>String</code> rappresentante tutte le variabili in base del
+   *         modello
    * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
    */
-  public static String variabiliBase() throws GRBException {
+  public static String ottieniVariabiliInBase() throws GRBException {
 
     ArrayList<String> variabiliBase = new ArrayList<>();
-    String [] base = ottieniVariabiliBase();
+    String[] base = ottieniVariabiliBase();
 
-    for(int i=0; i<base.length;i++) {
+    for (int i = 0; i < base.length; i++) {
       variabiliBase.add(String.format("%s", base[i]));
     }
 
@@ -465,18 +520,21 @@ public class App {
   }
 
   /**
-   * Metodo per ottenere tutti i coefficienti di costo ridotto delle variabili del modello
+   * Metodo per ottenere tutti i coefficienti di costo ridotto delle variabili del
+   * modello
    *
-   * @return Una <code>String</code> rappresentante tutti i coefficienti di costo ridotto delle variabili del modello
+   * @return Una <code>String</code> rappresentante tutti i coefficienti di costo
+   *         ridotto delle variabili del modello
    * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
    */
   public static String costoRidotto() throws GRBException {
 
     ArrayList<String> costoRidotto = new ArrayList<>();
-    GRBVar[] variabili = modello.getVars();
 
-    for(int i = 0; i < variabili.length; i++) {
-      costoRidotto.add(String.format("%.4f", variabili[i].get(GRB.DoubleAttr.RC)));
+    for (GRBVar x : modello.getVars()) {
+      double valore = x.get(GRB.DoubleAttr.RC);
+
+      costoRidotto.add(String.format("%.4f", valore));
     }
 
     return costoRidotto.toString();
@@ -485,53 +543,50 @@ public class App {
   public static String soluzioneMultipla() throws GRBException {
 
     int count = 0;
-    double epsilon = 1e-5;
     boolean multipla = false;
     int[] base = ottieniVariabiliBaseInt();
 
-    for(int i = 0; i < modello.getVars().length; i++) {
-      if(base[i] == 0 && Math.abs(modello.getVar(i).get(GRB.DoubleAttr.RC)) < epsilon) {
+    for (int i = 0; i < modello.getVars().length; i++) {
+      if (base[i] == 0 && Math.abs(modello.getVar(i).get(GRB.DoubleAttr.RC)) < epsilon) {
         count++;
       }
     }
 
-    if(count>0) {        //ho delle var/slack in base a 0
+    if (count > 0) { // ho delle var/slack in base a 0
       multipla = true;
     }
 
-    return (multipla ? "<Sì>" : "<No>");
+    return (multipla ? "Sì" : "No");
   }
 
   public static String soluzioneDegenere() throws GRBException {
 
     int count = 0;
     boolean degenere = false;
-    double epsilon = 1e-5;
     int[] var_in_base = ottieniVariabiliBaseInt();
 
-
-    for(int i = 0; i < modello.getVars().length; i++) {
-      if (var_in_base[i] == 1 && Math.abs(modello.getVar(i).get(GRB.DoubleAttr.X)) < epsilon){
+    for (int i = 0; i < modello.getVars().length; i++) {
+      if (var_in_base[i] == 1 && Math.abs(modello.getVar(i).get(GRB.DoubleAttr.X)) < epsilon) {
         count++;
 
-        System.out.println(modello.getVar(i).get(GRB.StringAttr.VarName) + " " + modello.getVar(i).get(GRB.DoubleAttr.X));
+        System.out
+            .println(modello.getVar(i).get(GRB.StringAttr.VarName) + " " + modello.getVar(i).get(GRB.DoubleAttr.X));
       }
     }
 
-    if(count > 0) {               //ho delle var/slack in base a 0
+    if (count > 0) { // ho delle var/slack in base a 0
       degenere = true;
     }
 
-    return (degenere ? "<Sì>" : "<No>");
+    return (degenere ? "Sì" : "No");
   }
 
   public static String vincoliVerticeOttimo() throws GRBException {
 
-    double epsilon = 1e-5;
     ArrayList<String> vincoliVerticeOttimo = new ArrayList<>();
 
-    for(var v : modello.getConstrs()) {
-      if(Math.abs(v.get(GRB.DoubleAttr.Slack)) < epsilon)
+    for (var v : modello.getConstrs()) {
+      if (Math.abs(v.get(GRB.DoubleAttr.Slack)) < epsilon)
         vincoliVerticeOttimo.add(v.get(GRB.StringAttr.ConstrName));
     }
 
@@ -543,13 +598,17 @@ public class App {
     String[] variabiliBase = new String[modello.getVars().length];
     int i = 0;
 
-    /*//variabili con nome
-    for (var v : modello.getVars()){
-      variabiliBase[i++] = (v.get(GRB.IntAttr.VBasis) == GRB.BASIC ? String.format("%s = 1", v.get(GRB.StringAttr.VarName)) : String.format("%s = 0", v.get(GRB.StringAttr.VarName)));
-    }*/
+    /*
+     * //variabili con nome
+     * for (var v : modello.getVars()){
+     * variabiliBase[i++] = (v.get(GRB.IntAttr.VBasis) == GRB.BASIC ?
+     * String.format("%s = 1", v.get(GRB.StringAttr.VarName)) :
+     * String.format("%s = 0", v.get(GRB.StringAttr.VarName)));
+     * }
+     */
 
-    //variabili
-    for (var v : modello.getVars()){
+    // variabili
+    for (var v : modello.getVars()) {
       variabiliBase[i++] = (v.get(GRB.IntAttr.VBasis) == GRB.BASIC ? "1" : "0");
     }
 
@@ -561,7 +620,7 @@ public class App {
     int[] variabiliBase = new int[modello.getVars().length];
     int i = 0;
 
-    for (var v : modello.getVars()){
+    for (var v : modello.getVars()) {
       variabiliBase[i++] = (v.get(GRB.IntAttr.VBasis) == GRB.BASIC ? 1 : 0);
     }
 
