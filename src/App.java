@@ -454,16 +454,12 @@ public class App {
    */
   public static String variabiliBase() throws GRBException {
 
-    StringBuilder variabiliBase = new StringBuilder();
+    ArrayList<String> variabiliBase = new ArrayList<>();
     String [] base = ottieniVariabiliBase();
 
-    variabiliBase.append("[");
-
-    for(int i=0; i<base.length-1;i++) {
-      variabiliBase.append(String.format("%s, ", base[i]));
+    for(int i=0; i<base.length;i++) {
+      variabiliBase.add(String.format("%s", base[i]));
     }
-
-    variabiliBase.append(String.format("%s]", base[base.length-1]));
 
     return variabiliBase.toString();
   }
@@ -476,28 +472,24 @@ public class App {
    */
   public static String costoRidotto() throws GRBException {
 
-    StringBuilder costoRidotto = new StringBuilder();
+    ArrayList<String> costoRidotto = new ArrayList<>();
     GRBVar[] variabili = modello.getVars();
 
-    costoRidotto.append("[");
-
-    for(int i = 0; i < variabili.length-1; i++) {
-      costoRidotto.append(String.format("%.4f, ", variabili[i].get(GRB.DoubleAttr.RC)));
+    for(int i = 0; i < variabili.length; i++) {
+      costoRidotto.add(String.format("%.4f", variabili[i].get(GRB.DoubleAttr.RC)));
     }
-
-    costoRidotto.append(String.format("%.4f]", variabili[variabili.length-1].get(GRB.DoubleAttr.RC)));
 
     return costoRidotto.toString();
   }
 
   public static String soluzioneMultipla() throws GRBException {
 
-    int i = 0, count = 0;
+    int count = 0;
     double epsilon = 1e-5;
     boolean multipla = false;
     int[] base = ottieniVariabiliBaseInt();
 
-    for(i = 0; i < modello.getVars().length; i++) {
+    for(int i = 0; i < modello.getVars().length; i++) {
       if(base[i] == 0 && Math.abs(modello.getVar(i).get(GRB.DoubleAttr.RC)) < epsilon) {
         count++;
       }
@@ -512,13 +504,13 @@ public class App {
 
   public static String soluzioneDegenere() throws GRBException {
 
-    int count = 0, i = 0;
+    int count = 0;
     boolean degenere = false;
     double epsilon = 1e-5;
     int[] var_in_base = ottieniVariabiliBaseInt();
 
 
-    for(i = 0; i < modello.getVars().length; i++) {
+    for(int i = 0; i < modello.getVars().length; i++) {
       if (var_in_base[i] == 1 && Math.abs(modello.getVar(i).get(GRB.DoubleAttr.X)) < epsilon){
         count++;
 
@@ -543,7 +535,7 @@ public class App {
         vincoliVerticeOttimo.add(v.get(GRB.StringAttr.ConstrName));
     }
 
-    return Arrays.toString(vincoliVerticeOttimo.toArray());
+    return vincoliVerticeOttimo.toString();
   }
 
   public static String[] ottieniVariabiliBase() throws GRBException {
