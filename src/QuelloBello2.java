@@ -42,7 +42,7 @@ public class QuelloBello2 {
                                         {3128, 1174, 3179, 2326, 2529,  313, 1210, 2380},
                                         { 521, 1357, 1848,  876, 2090, 2752, 1386, 2122} }; // Spettatori al minuto di ogni emittente per ogni fascia
 */
-
+/*
     private static final int M = 10;
     private static final int K = 6;
     private static final int S = 85058;
@@ -84,7 +84,7 @@ public class QuelloBello2 {
             {717, 419, 2192, 2881, 413, 1261},
             {2726, 2180, 1901, 3145, 3265, 2892},
             {1019, 2468, 1763, 700, 3426, 3064}};
-
+*/
 /*
     private static int M = 3;                  // Emittenti
     private static int K = 2;                  // Fasce orarie
@@ -105,7 +105,7 @@ public class QuelloBello2 {
             {18, 22}};   // Spettatori al minuto per emittente e per fascia
 // */
 
-/*
+
     private static int M = 2;                  // Emittenti
     private static int K = 2;                  // Fasce orarie
     private static int S = 30;                 // Copertura giornaliera di spettatori
@@ -120,7 +120,7 @@ public class QuelloBello2 {
 
     private static int[][] P = { {11, 10},
             { 5,  7} };   // Spettatori al minuto per emittente e per fascia
-*/
+
 
     private static final GRBVar[] x = new GRBVar[M*K]; // Incognite del modello
     private static final GRBVar[] s = new GRBVar[M+K+3+(M*K)]; // Slack/Surplus per la forma standard

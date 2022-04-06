@@ -102,7 +102,7 @@ public class Finale {
         printCCR(modello);
 
         dimVarSlack = modello.getVars().length;// assegno il n�di vincoli+ n� variabili per comodit�
-/*      //estraggo la matrice A
+      //estraggo la matrice A
         double[][] A= new double[modello.getConstrs().length][dimVarSlack];
         EstraiMatrA(modello, A);
 
@@ -125,7 +125,7 @@ public class Finale {
         for(GRBVar var : modello.getVars()) {
             //stampo il valore delle variabili e i costi ridotti associati all'ottimo
             System.out.print( var.get(DoubleAttr.RC) + "       \t");
-        }*/
+        }
     }
 
     private static void aggiungiVariabili(GRBModel modello) throws GRBException {
