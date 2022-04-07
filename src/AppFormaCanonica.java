@@ -735,6 +735,50 @@ public class AppFormaCanonica {
     return formattato;
   }
 
+  /**
+   * Formatta con 4 cifre decimali un <code>ArrayList</code> di
+   * <code>Double</code>
+   *
+   * @param v  di <code>double</code> di cui fare la combinazione convessa
+   * @return Un <code>double[]</code> contenente la combinazione convessa
+   */
+  private static double[] combinazioneConvessa(double v[]) {
+
+    double alfa[] = new double[v.length];
+    double counter = 0;
+    Random rand = new Random();
+    do {
+      for (int i = 0; i < v.length - 1; i++) {
+        alfa[i] = (rand.nextInt(1000) + 1) / 100000.;
+        counter += alfa[i];
+      }
+
+      alfa[v.length-1] = 1-counter;
+    }while(alfa[v.length-1] < 0);
+
+    for (int i = 0; i < alfa.length; i++) {
+      alfa[i] = alfa[i] * v[i];
+    }
+
+    return alfa;
+  }
+
+  private static String soluzione1() throws GRBException {
+
+    StringBuilder soluzione = new StringBuilder();
+    soluzione3 = combinazioneConvessa(soluzione3);
+    int i = 0;
+
+    for (GRBVar x : modello.getVars()) {
+      String nome = x.get(GRB.StringAttr.VarName);
+      double valore = soluzione3[i++];
+
+      soluzione.append(String.format("%s = %.4f\n", nome, valore));
+    }
+
+    return soluzione.toString();
+  }
+
   private static String soluzione2() throws GRBException {
 
     StringBuilder soluzione = new StringBuilder();
@@ -785,49 +829,5 @@ public class AppFormaCanonica {
 
 
     return soluzione.toString();
-  }
-
-  private static String soluzione1() throws GRBException {
-
-    StringBuilder soluzione = new StringBuilder();
-    soluzione3 = combinazioneConvessa(soluzione3);
-    int i = 0;
-
-    for (GRBVar x : modello.getVars()) {
-      String nome = x.get(GRB.StringAttr.VarName);
-      double valore = soluzione3[i++];
-
-      soluzione.append(String.format("%s = %.4f\n", nome, valore));
-    }
-
-    return soluzione.toString();
-  }
-
-  /**
-   * Formatta con 4 cifre decimali un <code>ArrayList</code> di
-   * <code>Double</code>
-   *
-   * @param v  di <code>double</code> di cui fare la combinazione convessa
-   * @return Un <code>double[]</code> contenente la combinazione convessa
-   */
-  private static double[] combinazioneConvessa(double v[]) {
-
-    double alfa[] = new double[v.length];
-    double counter = 0;
-    Random rand = new Random();
-    do {
-      for (int i = 0; i < v.length - 1; i++) {
-        alfa[i] = (rand.nextInt(1000) + 1) / 100000.;
-        counter += alfa[i];
-      }
-
-      alfa[v.length-1] = 1-counter;
-    }while(alfa[v.length-1] < 0);
-
-    for (int i = 0; i < alfa.length; i++) {
-      alfa[i] = alfa[i] * v[i];
-    }
-
-    return alfa;
   }
 }
