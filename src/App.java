@@ -12,6 +12,7 @@
 import gurobi.*;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Classe principale contenete l'intero modello, non che il suo svolgimento
@@ -127,7 +128,7 @@ public class App {
 
       inizializzaVariabili(0);
 
-      impostaFunzioneObiettivo();
+      impostaFunzioneObiettivo(0);
 
       impostaVincoli(0);
 
@@ -160,7 +161,7 @@ public class App {
       }
     }
 
-    // Inizializzazione della funzione obbiettivo
+    // Aggiunge la variabile a per sciogliere il modulo
     a = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "a");
   }
 
@@ -170,12 +171,19 @@ public class App {
    *
    * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
    */
-  private static void impostaFunzioneObiettivo() throws GRBException {
+  private static void impostaFunzioneObiettivo(int modalita) throws GRBException {
     // Creo un'espressione lineare che andrà a rappresentare la mia funzione
     // obiettivo
     GRBLinExpr funzioneObiettivo = new GRBLinExpr();
 
-    funzioneObiettivo.addTerm(1, a); // Aggiungo il termine 'a' alla funzione obiettivo
+    if (modalita <= 1){
+      funzioneObiettivo.addTerm(1, a); // Aggiungo il termine 'a' alla funzione obiettivo
+    }
+    else{
+      for (int i = 0; i < y.length; i++) {
+        funzioneObiettivo.addTerm(1, y[i]); // Aggiungo il termini y alla funzione obiettivo nel caso di risoluzione con metodo delle due fasi
+      }
+    }
 
     modello.setObjective(funzioneObiettivo, GRB.MINIMIZE); // Imposto come funzione obiettivo del modello l'espressione
                                                            // lineare creata dicendo che voglio minimizzarla
@@ -208,7 +216,6 @@ public class App {
     // Aggiungo le variabili di slack/surplus e quelle ausiliarie alle rispettive espressioni lineari (solo FORMA STANDARD)
     if(modalita == 1) {
       vincoloDiModulo0.addTerm(1, s[indiceSlack++]);
-
       vincoloDiModulo1.addTerm(1, s[indiceSlack++]);
     } else if (modalita == 2) {
       vincoloDiModulo0.addTerm(1, s[indiceSlack++]);
@@ -443,6 +450,11 @@ public class App {
     System.out.println("soluzione ottima degenere: " + isDegenere());
     System.out.println("vincoli vertice ottimo:" + ottieniVincoliVerticeOttimo());
 
+    /*double[] v = combinazioneConvessa();
+
+    for (int i = 0; i < v.length; i++) {
+      System.out.println(v[i]);
+    }*/
   }
 
   /**
@@ -681,5 +693,33 @@ public class App {
     }
 
     return formattato;
+  }
+
+  /**
+   * Formatta con 4 cifre decimali un <code>ArrayList</code> di
+   * <code>Double</code>
+   *
+   * @param v  di <code>double</code> di cui fare la combinazione convessa
+   * @return Un <code>double[]</code> contenente la combinazione convessa
+   */
+  private static double[] combinazioneConvessa(double v[]) {
+
+    double alfa[] = new double[v.length];
+    double counter = 0;
+    Random rand = new Random();
+    do {
+      for (int i = 0; i < v.length - 1; i++) {
+        alfa[i] = (rand.nextInt(1000) + 1) / 100000.;
+        counter += alfa[i];
+      }
+
+      alfa[v.length-1] = 1-counter;
+    }while(alfa[v.length-1] < 0);
+
+    for (int i = 0; i < alfa.length; i++) {
+      alfa[i] = alfa[i] * v[i];
+    }
+
+    return alfa;
   }
 }
