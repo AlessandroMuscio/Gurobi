@@ -151,18 +151,18 @@ public class AppFormaCanonica {
   private static void inizializzaVariabili(int modalita) throws GRBException {
     // Inizializzazione delle incognite del modello
     for (int i = 0; i < x.length; i++) {
-      x[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "x" + (i + 1));
+      x[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, String.format("x%03d", (i + 1)));
     }
 
     // Inizializzazione delle slack/surplus e delle variabili ausiliarie del modello
     if (modalita == 1) {
       for (int i = 0; i < s.length; i++) {
-        s[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "s" + (i + 1));
+        s[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, String.format("s%03d", (i + 1)));
       }
     } else if (modalita == 2) {
       for (int i = 0; i < s.length; i++) {
-        s[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "s" + (i + 1));
-        y[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "y" + (i + 1));
+        s[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, String.format("s%03d", (i + 1)));
+        y[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, String.format("y%03d", (i + 1)));
       }
     }
 
