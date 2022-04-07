@@ -1,13 +1,13 @@
 /*Consegna***********************************************************************************************************************************
-* Il responsabile marketing di una nota azienda di Matriciopoli è incaricato dell’acquisto di spazi pubblicitari su M emittenti televisive. *
-* La giornata televisiva è suddivisa in j = 1, 2, ..., K fasce orarie in cui è possibile acquistare minuti di pubblicità. In particolare,   *
-* in ciascuna fascia j dell’emittente i, i = 1, ..., M : l’azienda può finalizzare l’acquisto a un costo pari a Cij euro/minuto             *
-* garantendosi una copertura di Pij spettatori/minuto; non può acquistare più di τij minuti, per questioni di libera concorrenza. La        *
-* direzione stabilisce di voler investire non più di βi euro su una qualsivoglia emittente i, ma almeno Ω% del bilancio totale su ogni      *
-* fascia oraria j. Sapendo che l’azienda desidera ottenere una copertura giornaliera complessiva di almeno S spettatori, si aiuti il        *
-* responsabile a decidere la programmazione ideale in modo da minimizzare lo scarto tra le persone raggiunte nelle prime K/2 fasce orarie e *
-* le persone raggiunte nelle restanti.                                                                                                      *
-*********************************************************************************************************************************************/
+ * Il responsabile marketing di una nota azienda di Matriciopoli è incaricato dell’acquisto di spazi pubblicitari su M emittenti televisive. *
+ * La giornata televisiva è suddivisa in j = 1, 2, ..., K fasce orarie in cui è possibile acquistare minuti di pubblicità. In particolare,   *
+ * in ciascuna fascia j dell’emittente i, i = 1, ..., M : l’azienda può finalizzare l’acquisto a un costo pari a Cij euro/minuto             *
+ * garantendosi una copertura di Pij spettatori/minuto; non può acquistare più di τij minuti, per questioni di libera concorrenza. La        *
+ * direzione stabilisce di voler investire non più di βi euro su una qualsivoglia emittente i, ma almeno Ω% del bilancio totale su ogni      *
+ * fascia oraria j. Sapendo che l’azienda desidera ottenere una copertura giornaliera complessiva di almeno S spettatori, si aiuti il        *
+ * responsabile a decidere la programmazione ideale in modo da minimizzare lo scarto tra le persone raggiunte nelle prime K/2 fasce orarie e *
+ * le persone raggiunte nelle restanti.                                                                                                      *
+ *********************************************************************************************************************************************/
 
 import gurobi.*;
 
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 /**
  * Classe principale contenete l'intero modello, non che il suo svolgimento
  */
-public class App {
+public class AppFormaCanonica {
   // Variabili del problema
   /**
    * Variabile che rappresenta il numero di emittenti televisive
@@ -45,43 +45,43 @@ public class App {
    * emittente per fascia oraria
    */
   private static final int[][] tau = { { 2, 2, 2, 1, 2, 2, 1, 3 },
-      { 2, 2, 1, 2, 2, 2, 2, 3 },
-      { 2, 2, 2, 2, 3, 1, 2, 1 },
-      { 2, 2, 2, 1, 1, 3, 2, 1 },
-      { 2, 1, 3, 2, 3, 2, 2, 1 },
-      { 2, 1, 2, 2, 2, 3, 3, 2 },
-      { 3, 3, 1, 1, 2, 1, 2, 2 },
-      { 3, 3, 2, 2, 2, 1, 3, 2 },
-      { 3, 2, 2, 2, 3, 3, 1, 2 },
-      { 3, 3, 3, 2, 2, 2, 3, 3 } };
+          { 2, 2, 1, 2, 2, 2, 2, 3 },
+          { 2, 2, 2, 2, 3, 1, 2, 1 },
+          { 2, 2, 2, 1, 1, 3, 2, 1 },
+          { 2, 1, 3, 2, 3, 2, 2, 1 },
+          { 2, 1, 2, 2, 2, 3, 3, 2 },
+          { 3, 3, 1, 1, 2, 1, 2, 2 },
+          { 3, 3, 2, 2, 2, 1, 3, 2 },
+          { 3, 2, 2, 2, 3, 3, 1, 2 },
+          { 3, 3, 3, 2, 2, 2, 3, 3 } };
   /**
    * Variabile che rappresenta il costo, in € al minuto, per emittente in ogni
    * fascia oraria
    */
   private static final int[][] C = { { 1400, 1198, 1272, 1082, 936, 1130, 1280, 1249 },
-      { 1069, 1358, 1194, 1227, 1344, 975, 1206, 1021 },
-      { 1285, 964, 1342, 924, 1286, 1298, 1320, 925 },
-      { 911, 1052, 959, 1149, 1170, 1363, 1296, 1002 },
-      { 1121, 1211, 988, 1168, 1175, 1037, 1066, 1221 },
-      { 929, 971, 1144, 1257, 1103, 1208, 1125, 1305 },
-      { 1345, 1103, 1349, 1213, 1101, 1283, 1303, 928 },
-      { 1385, 1136, 975, 1239, 1179, 1140, 1387, 1282 },
-      { 918, 1054, 1281, 1337, 935, 1119, 1210, 1132 },
-      { 1133, 1302, 927, 1179, 1027, 1207, 1150, 1088 } };
+          { 1069, 1358, 1194, 1227, 1344, 975, 1206, 1021 },
+          { 1285, 964, 1342, 924, 1286, 1298, 1320, 925 },
+          { 911, 1052, 959, 1149, 1170, 1363, 1296, 1002 },
+          { 1121, 1211, 988, 1168, 1175, 1037, 1066, 1221 },
+          { 929, 971, 1144, 1257, 1103, 1208, 1125, 1305 },
+          { 1345, 1103, 1349, 1213, 1101, 1283, 1303, 928 },
+          { 1385, 1136, 975, 1239, 1179, 1140, 1387, 1282 },
+          { 918, 1054, 1281, 1337, 935, 1119, 1210, 1132 },
+          { 1133, 1302, 927, 1179, 1027, 1207, 1150, 1088 } };
   /**
    * Variabile che rappresenta il numero di spettatori al minuto per emittente in
    * ogni fascia oraria
    */
   private static final int[][] P = { { 2890, 1584, 2905, 2465, 1128, 2285, 3204, 1009 },
-      { 3399, 355, 2070, 905, 814, 772, 2502, 2780 },
-      { 590, 2861, 744, 3245, 2846, 2545, 2584, 633 },
-      { 1332, 2682, 3264, 1558, 1162, 414, 1004, 1580 },
-      { 674, 1122, 1333, 1205, 3319, 2519, 2827, 1852 },
-      { 2481, 1761, 2079, 1197, 3223, 3478, 2767, 1462 },
-      { 1740, 3204, 2644, 3302, 474, 2765, 2296, 2376 },
-      { 3471, 1593, 2726, 1921, 1841, 1191, 2294, 1642 },
-      { 900, 3035, 2951, 1440, 852, 1842, 307, 3189 },
-      { 2104, 389, 3188, 365, 1931, 2563, 2770, 1844 } };
+          { 3399, 355, 2070, 905, 814, 772, 2502, 2780 },
+          { 590, 2861, 744, 3245, 2846, 2545, 2584, 633 },
+          { 1332, 2682, 3264, 1558, 1162, 414, 1004, 1580 },
+          { 674, 1122, 1333, 1205, 3319, 2519, 2827, 1852 },
+          { 2481, 1761, 2079, 1197, 3223, 3478, 2767, 1462 },
+          { 1740, 3204, 2644, 3302, 474, 2765, 2296, 2376 },
+          { 3471, 1593, 2726, 1921, 1841, 1191, 2294, 1642 },
+          { 900, 3035, 2951, 1440, 852, 1842, 307, 3189 },
+          { 2104, 389, 3188, 365, 1931, 2563, 2770, 1844 } };
 
   // Variabili di Gurobi
   /**
@@ -155,10 +155,10 @@ public class App {
 
     // Inizializzazione delle slack/surplus e delle variabili ausiliarie del modello
 
-    /*for (int i = 0; i < s.length; i++) {
-      s[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "s" + (i + 1));
-      y[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "y" + (i + 1));
-    }*/
+    for (int i = 0; i < s.length; i++) {
+      //s[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "s" + (i + 1));
+      //y[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "y" + (i + 1));
+    }
 
     // Inizializzazione della funzione obbiettivo
     a = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "a");
@@ -178,7 +178,7 @@ public class App {
     funzioneObiettivo.addTerm(1, a); // Aggiungo il termine 'a' alla funzione obiettivo
 
     modello.setObjective(funzioneObiettivo, GRB.MINIMIZE); // Imposto come funzione obiettivo del modello l'espressione
-                                                           // lineare creata dicendo che voglio minimizzarla
+    // lineare creata dicendo che voglio minimizzarla
   }
 
   /**
@@ -205,7 +205,7 @@ public class App {
     /*
      * vincoloModulo0.addTerm(1, s[indiceSlack++]);
      * vincoloModulo0.addTerm(1, y[indiceAusiliarie++]);
-     * 
+     *
      * vincoloModulo1.addTerm(1, s[indiceSlack++]);
      * vincoloModulo1.addTerm(1, y[indiceAusiliarie++]);
      */
@@ -366,7 +366,7 @@ public class App {
 
   /**
    * Metodo che calcola l'ottimo del problema e stampa i risultati
-   * 
+   *
    * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
    */
   private static void calcolaEStampa() throws GRBException {
@@ -496,12 +496,21 @@ public class App {
    */
   private static String ottieniSoluzioneDiBaseOttima() throws GRBException {
     StringBuilder soluzioneDiBaseOttima = new StringBuilder();
+    int i = 1;
 
     for (GRBVar x : modello.getVars()) {
       String nome = x.get(GRB.StringAttr.VarName);
       double valore = x.get(GRB.DoubleAttr.X);
 
       soluzioneDiBaseOttima.append(String.format("%s = %.4f\n", nome, valore));
+    }
+
+    String nome = "s";
+
+    for (GRBConstr x : modello.getConstrs()) {
+      double valore = x.get(GRB.DoubleAttr.Slack);
+
+      soluzioneDiBaseOttima.append(String.format("%s = %.4f\n", nome+i++, valore >= 0 ? valore : -valore));
     }
 
     return soluzioneDiBaseOttima.toString();
@@ -522,6 +531,11 @@ public class App {
     for (GRBVar x : modello.getVars()) {
       inBase = x.get(GRB.IntAttr.VBasis);
 
+      variabiliInBase.add(inBase == GRB.BASIC ? 1 : 0);
+    }
+
+    for (GRBConstr x : modello.getConstrs()) {
+      inBase = x.get(GRB.IntAttr.CBasis);
       variabiliInBase.add(inBase == GRB.BASIC ? 1 : 0);
     }
 
@@ -547,6 +561,11 @@ public class App {
       ccrValues.add(ccr);
     }
 
+    for (GRBConstr x : modello.getConstrs()) {
+      double ccr = x.get(GRB.DoubleAttr.Pi);
+
+      ccrValues.add(Math.abs(ccr));
+    }
     return ccrValues;
   }
 
@@ -560,10 +579,15 @@ public class App {
   private static String isMultipla() throws GRBException {
 
     ArrayList<Integer> variabiliInBase = ottieniVariabiliInBase();
-    ArrayList<Double> ccr = ottieniCCR();
 
     for (int i = 0; i < modello.getVars().length; i++) {
-      if (variabiliInBase.get(i) == 0 && Math.abs(ccr.get(i)) < epsilon) {
+      if (variabiliInBase.get(i) == 0 && Math.abs(modello.getVar(i).get(GRB.DoubleAttr.RC)) < epsilon) {
+        return "Sì";
+      }
+    }
+
+    for (int i = 0; i < modello.getConstrs().length; i++) {
+      if (variabiliInBase.get(i) == 0 && Math.abs(modello.getVar(i).get(GRB.DoubleAttr.Pi)) < epsilon) {
         return "Sì";
       }
     }
@@ -581,9 +605,16 @@ public class App {
   private static String isDegenere() throws GRBException {
 
     ArrayList<Integer> variabiliInBase = ottieniVariabiliInBase();
+    ArrayList<Double> ccr = ottieniCCR();
 
     for (int i = 0; i < modello.getVars().length; i++) {
       if (variabiliInBase.get(i) == 1 && Math.abs(modello.getVar(i).get(GRB.DoubleAttr.X)) < epsilon) {
+        return "Sì";
+      }
+    }
+
+    for (int i = 0; i < modello.getConstrs().length; i++) {
+      if (variabiliInBase.get(i) == 1 && Math.abs(modello.getVar(i).get(GRB.DoubleAttr.RHS)) < epsilon) {
         return "Sì";
       }
     }

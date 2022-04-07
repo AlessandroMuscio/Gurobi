@@ -1,13 +1,13 @@
 /*Consegna***********************************************************************************************************************************
-* Il responsabile marketing di una nota azienda di Matriciopoli è incaricato dell’acquisto di spazi pubblicitari su M emittenti televisive. *
-* La giornata televisiva è suddivisa in j = 1, 2, ..., K fasce orarie in cui è possibile acquistare minuti di pubblicità. In particolare,   *
-* in ciascuna fascia j dell’emittente i, i = 1, ..., M : l’azienda può finalizzare l’acquisto a un costo pari a Cij euro/minuto             *
-* garantendosi una copertura di Pij spettatori/minuto; non può acquistare più di τij minuti, per questioni di libera concorrenza. La        *
-* direzione stabilisce di voler investire non più di βi euro su una qualsivoglia emittente i, ma almeno Ω% del bilancio totale su ogni      *
-* fascia oraria j. Sapendo che l’azienda desidera ottenere una copertura giornaliera complessiva di almeno S spettatori, si aiuti il        *
-* responsabile a decidere la programmazione ideale in modo da minimizzare lo scarto tra le persone raggiunte nelle prime K/2 fasce orarie e *
-* le persone raggiunte nelle restanti.                                                                                                      *
-*********************************************************************************************************************************************/
+ * Il responsabile marketing di una nota azienda di Matriciopoli è incaricato dell’acquisto di spazi pubblicitari su M emittenti televisive. *
+ * La giornata televisiva è suddivisa in j = 1, 2, ..., K fasce orarie in cui è possibile acquistare minuti di pubblicità. In particolare,   *
+ * in ciascuna fascia j dell’emittente i, i = 1, ..., M : l’azienda può finalizzare l’acquisto a un costo pari a Cij euro/minuto             *
+ * garantendosi una copertura di Pij spettatori/minuto; non può acquistare più di τij minuti, per questioni di libera concorrenza. La        *
+ * direzione stabilisce di voler investire non più di βi euro su una qualsivoglia emittente i, ma almeno Ω% del bilancio totale su ogni      *
+ * fascia oraria j. Sapendo che l’azienda desidera ottenere una copertura giornaliera complessiva di almeno S spettatori, si aiuti il        *
+ * responsabile a decidere la programmazione ideale in modo da minimizzare lo scarto tra le persone raggiunte nelle prime K/2 fasce orarie e *
+ * le persone raggiunte nelle restanti.                                                                                                      *
+ *********************************************************************************************************************************************/
 
 import gurobi.*;
 
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 /**
  * Classe principale contenete l'intero modello, non che il suo svolgimento
  */
-public class App {
+public class AppSlack {
   // Variabili del problema
   /**
    * Variabile che rappresenta il numero di emittenti televisive
@@ -45,43 +45,43 @@ public class App {
    * emittente per fascia oraria
    */
   private static final int[][] tau = { { 2, 2, 2, 1, 2, 2, 1, 3 },
-      { 2, 2, 1, 2, 2, 2, 2, 3 },
-      { 2, 2, 2, 2, 3, 1, 2, 1 },
-      { 2, 2, 2, 1, 1, 3, 2, 1 },
-      { 2, 1, 3, 2, 3, 2, 2, 1 },
-      { 2, 1, 2, 2, 2, 3, 3, 2 },
-      { 3, 3, 1, 1, 2, 1, 2, 2 },
-      { 3, 3, 2, 2, 2, 1, 3, 2 },
-      { 3, 2, 2, 2, 3, 3, 1, 2 },
-      { 3, 3, 3, 2, 2, 2, 3, 3 } };
+          { 2, 2, 1, 2, 2, 2, 2, 3 },
+          { 2, 2, 2, 2, 3, 1, 2, 1 },
+          { 2, 2, 2, 1, 1, 3, 2, 1 },
+          { 2, 1, 3, 2, 3, 2, 2, 1 },
+          { 2, 1, 2, 2, 2, 3, 3, 2 },
+          { 3, 3, 1, 1, 2, 1, 2, 2 },
+          { 3, 3, 2, 2, 2, 1, 3, 2 },
+          { 3, 2, 2, 2, 3, 3, 1, 2 },
+          { 3, 3, 3, 2, 2, 2, 3, 3 } };
   /**
    * Variabile che rappresenta il costo, in € al minuto, per emittente in ogni
    * fascia oraria
    */
   private static final int[][] C = { { 1400, 1198, 1272, 1082, 936, 1130, 1280, 1249 },
-      { 1069, 1358, 1194, 1227, 1344, 975, 1206, 1021 },
-      { 1285, 964, 1342, 924, 1286, 1298, 1320, 925 },
-      { 911, 1052, 959, 1149, 1170, 1363, 1296, 1002 },
-      { 1121, 1211, 988, 1168, 1175, 1037, 1066, 1221 },
-      { 929, 971, 1144, 1257, 1103, 1208, 1125, 1305 },
-      { 1345, 1103, 1349, 1213, 1101, 1283, 1303, 928 },
-      { 1385, 1136, 975, 1239, 1179, 1140, 1387, 1282 },
-      { 918, 1054, 1281, 1337, 935, 1119, 1210, 1132 },
-      { 1133, 1302, 927, 1179, 1027, 1207, 1150, 1088 } };
+          { 1069, 1358, 1194, 1227, 1344, 975, 1206, 1021 },
+          { 1285, 964, 1342, 924, 1286, 1298, 1320, 925 },
+          { 911, 1052, 959, 1149, 1170, 1363, 1296, 1002 },
+          { 1121, 1211, 988, 1168, 1175, 1037, 1066, 1221 },
+          { 929, 971, 1144, 1257, 1103, 1208, 1125, 1305 },
+          { 1345, 1103, 1349, 1213, 1101, 1283, 1303, 928 },
+          { 1385, 1136, 975, 1239, 1179, 1140, 1387, 1282 },
+          { 918, 1054, 1281, 1337, 935, 1119, 1210, 1132 },
+          { 1133, 1302, 927, 1179, 1027, 1207, 1150, 1088 } };
   /**
    * Variabile che rappresenta il numero di spettatori al minuto per emittente in
    * ogni fascia oraria
    */
   private static final int[][] P = { { 2890, 1584, 2905, 2465, 1128, 2285, 3204, 1009 },
-      { 3399, 355, 2070, 905, 814, 772, 2502, 2780 },
-      { 590, 2861, 744, 3245, 2846, 2545, 2584, 633 },
-      { 1332, 2682, 3264, 1558, 1162, 414, 1004, 1580 },
-      { 674, 1122, 1333, 1205, 3319, 2519, 2827, 1852 },
-      { 2481, 1761, 2079, 1197, 3223, 3478, 2767, 1462 },
-      { 1740, 3204, 2644, 3302, 474, 2765, 2296, 2376 },
-      { 3471, 1593, 2726, 1921, 1841, 1191, 2294, 1642 },
-      { 900, 3035, 2951, 1440, 852, 1842, 307, 3189 },
-      { 2104, 389, 3188, 365, 1931, 2563, 2770, 1844 } };
+          { 3399, 355, 2070, 905, 814, 772, 2502, 2780 },
+          { 590, 2861, 744, 3245, 2846, 2545, 2584, 633 },
+          { 1332, 2682, 3264, 1558, 1162, 414, 1004, 1580 },
+          { 674, 1122, 1333, 1205, 3319, 2519, 2827, 1852 },
+          { 2481, 1761, 2079, 1197, 3223, 3478, 2767, 1462 },
+          { 1740, 3204, 2644, 3302, 474, 2765, 2296, 2376 },
+          { 3471, 1593, 2726, 1921, 1841, 1191, 2294, 1642 },
+          { 900, 3035, 2951, 1440, 852, 1842, 307, 3189 },
+          { 2104, 389, 3188, 365, 1931, 2563, 2770, 1844 } };
 
   // Variabili di Gurobi
   /**
@@ -106,10 +106,8 @@ public class App {
   private static GRBVar a;
 
   // Utilizzare per risolvere il modello in FORMA STANDARD
-  /*
-   * private static int indiceSlack = 0;
-   * private static int indiceAusiliarie = 0;
-   */
+  private static int indiceSlack = 0;
+  //private static int indiceAusiliarie = 0;
 
   // Variabili di utilità
   /**
@@ -136,6 +134,10 @@ public class App {
       impostaVincoliDiBilancio();
       impostaVincoliDiTempo();
 
+      GRBLinExpr e = new GRBLinExpr();
+      e.addTerm(1, s[0]);
+      modello.addConstr(e,GRB.EQUAL, 100, "fasullo");
+
       calcolaEStampa();
     } catch (GRBException e) {
       System.out.println("Error code: " + e.getErrorCode() + ". " + e.getMessage());
@@ -155,10 +157,10 @@ public class App {
 
     // Inizializzazione delle slack/surplus e delle variabili ausiliarie del modello
 
-    /*for (int i = 0; i < s.length; i++) {
+    for (int i = 0; i < s.length; i++) {
       s[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "s" + (i + 1));
-      y[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "y" + (i + 1));
-    }*/
+      //y[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "y" + (i + 1));
+    }
 
     // Inizializzazione della funzione obbiettivo
     a = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "a");
@@ -178,7 +180,7 @@ public class App {
     funzioneObiettivo.addTerm(1, a); // Aggiungo il termine 'a' alla funzione obiettivo
 
     modello.setObjective(funzioneObiettivo, GRB.MINIMIZE); // Imposto come funzione obiettivo del modello l'espressione
-                                                           // lineare creata dicendo che voglio minimizzarla
+    // lineare creata dicendo che voglio minimizzarla
   }
 
   /**
@@ -202,23 +204,21 @@ public class App {
 
     // Aggiungo le variabili di slack/surplus e quelle ausiliarie alle rispettive
     // espressioni lineari (solo FORMA STANDARD)
-    /*
-     * vincoloModulo0.addTerm(1, s[indiceSlack++]);
-     * vincoloModulo0.addTerm(1, y[indiceAusiliarie++]);
-     * 
-     * vincoloModulo1.addTerm(1, s[indiceSlack++]);
-     * vincoloModulo1.addTerm(1, y[indiceAusiliarie++]);
-     */
+
+     vincoloDiModulo0.addTerm(1, s[indiceSlack++]);
+     //vincoloModulo0.addTerm(1, y[indiceAusiliarie++]);
+
+     vincoloDiModulo1.addTerm(1, s[indiceSlack++]);
+     //vincoloModulo1.addTerm(1, y[indiceAusiliarie++]);
 
     // Aggiungo i vincoli con il termine noto al modello (FORMA NON STANDARD)
-    modello.addConstr(vincoloDiModulo0, GRB.LESS_EQUAL, a, "Vincolo_di_modulo_0");
-    modello.addConstr(vincoloDiModulo1, GRB.LESS_EQUAL, a, "Vincolo_di_modulo_1");
+    //modello.addConstr(vincoloDiModulo0, GRB.LESS_EQUAL, a, "Vincolo_di_modulo_0");
+    //modello.addConstr(vincoloDiModulo1, GRB.LESS_EQUAL, a, "Vincolo_di_modulo_1");
 
     // Aggiungo i vincoli con il termine noto al modello (solo FORMA STANDARD)
-    /*
-     * modello.addConstr(vincoloModulo0, GRB.EQUAL, a, "Vincolo_di_modulo_0");
-     * modello.addConstr(vincoloModulo1, GRB.EQUAL, a, "Vincolo_di_modulo_1");
-     */
+    modello.addConstr(vincoloDiModulo0, GRB.EQUAL, a, "Vincolo_di_modulo_0");
+    modello.addConstr(vincoloDiModulo1, GRB.EQUAL, a, "Vincolo_di_modulo_1");
+
   }
 
   /**
@@ -240,18 +240,14 @@ public class App {
 
     // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione
     // lineare (FORMA STANDARD)
-    /*
-     * vincoloCopertura.addTerm(-1, s[indiceSlack++]);
-     * vincoloCopertura.addTerm(1, y[indiceAusiliarie++]);
-     */
+    vincoloDiCopertura.addTerm(-1, s[indiceSlack++]);
+    //vincoloCopertura.addTerm(1, y[indiceAusiliarie++]);
 
     // Aggiungo il vincolo con il termine noto al modello (FORMA NON STANDARD)
-    modello.addConstr(vincoloDiCopertura, GRB.GREATER_EQUAL, S, "Vincolo_di_copertura");
+    //modello.addConstr(vincoloDiCopertura, GRB.GREATER_EQUAL, S, "Vincolo_di_copertura");
 
     // Aggiungo il vincolo con il termine noto al modello (FORMA STANDARD)
-    /*
-     * modello.addConstr(vincoloDiCopertura, GRB.EQUAL, S, "Vincolo_di_copertura");
-     */
+    modello.addConstr(vincoloDiCopertura, GRB.EQUAL, S, "Vincolo_di_copertura");
   }
 
   /**
@@ -272,18 +268,15 @@ public class App {
 
       // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione
       // lineare (FORMA STANDARD)
-      /*
-       * vincoloCosto.addTerm(1, s[indiceSlack++]);
-       * vincoloCosto.addTerm(1, y[indiceAusiliarie++]);
-       */
+      vincoloDiCosto.addTerm(1, s[indiceSlack++]);
+       //vincoloCosto.addTerm(1, y[indiceAusiliarie++]);
 
       // Aggiungo il vincolo con il termine noto al modello (FORMA NON STANDARD)
-      modello.addConstr(vincoloDiCosto, GRB.LESS_EQUAL, beta[i], "Vincolo_di_costo_" + i);
+      //modello.addConstr(vincoloDiCosto, GRB.LESS_EQUAL, beta[i], "Vincolo_di_costo_" + i);
 
       // Aggiungo il vincolo con il termine noto al modello (FORMA STANDARD)
-      /*
-       * modello.addConstr(vincoloCosto, GRB.EQUAL, beta[i], "Vincolo_di_costo_" + i);
-       */
+      modello.addConstr(vincoloDiCosto, GRB.EQUAL, beta[i], "Vincolo_di_costo_" + i);
+
     }
   }
 
@@ -314,19 +307,16 @@ public class App {
 
       // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione
       // lineare (FORMA STANDARD)
-      /*
-       * vincoloConcorrenza.addTerm(-1, s[indiceSlack++]);
-       * vincoloConcorrenza.addTerm(1, y[indiceAusiliarie++]);
-       */
+      vincoloDiBilancio.addTerm(-1, s[indiceSlack++]);
+       //vincoloConcorrenza.addTerm(1, y[indiceAusiliarie++]);
+
 
       // Aggiungo il vincolo con il termine noto al modello (FORMA NON STANDARD)
-      modello.addConstr(vincoloDiBilancio, GRB.GREATER_EQUAL, termineNoto, "Vincolo_di_budget_" + j);
+      //modello.addConstr(vincoloDiBilancio, GRB.GREATER_EQUAL, termineNoto, "Vincolo_di_budget_" + j);
 
       // Aggiungo il vincolo con il termine noto al modello (FORMA STANDARD)
-      /*
-       * modello.addConstr(vincoloDiBilancio, GRB.EQUAL, termineNoto,
-       * "Vincolo_di_budget_" + j);
-       */
+      modello.addConstr(vincoloDiBilancio, GRB.EQUAL, termineNoto, "Vincolo_di_budget_" + j);
+
     }
   }
 
@@ -347,26 +337,23 @@ public class App {
 
         // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione
         // lineare (solo FORMA STANDARD)
-        /*
-         * vincoloTempo.addTerm(1, s[indiceSlack++]);
-         * vincoloTempo.addTerm(1, y[indiceAusiliarie++]);
-         */
+        vincoloTempo.addTerm(1, s[indiceSlack++]);
+         //vincoloTempo.addTerm(1, y[indiceAusiliarie++]);
+
 
         // Aggiungo il vincolo con il termine noto al modello (FORMA NON STANDARD)
-        modello.addConstr(vincoloTempo, GRB.LESS_EQUAL, tau[i][j], "Vincolo_di_tempo_" + i + "" + j);
+        //modello.addConstr(vincoloTempo, GRB.LESS_EQUAL, tau[i][j], "Vincolo_di_tempo_" + i + "" + j);
 
         // Aggiungo il vincolo con il termine noto al modello (FORMA STANDARD)
-        /*
-         * modello.addConstr(vincoloTempo, GRB.EQUAL, tau[i][j], "Vincolo_di_tempo_" + i
-         * + "" + j);
-         */
+        modello.addConstr(vincoloTempo, GRB.EQUAL, tau[i][j], "Vincolo_di_tempo_" + i + "" + j);
+
       }
     }
   }
 
   /**
    * Metodo che calcola l'ottimo del problema e stampa i risultati
-   * 
+   *
    * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
    */
   private static void calcolaEStampa() throws GRBException {
@@ -561,14 +548,16 @@ public class App {
 
     ArrayList<Integer> variabiliInBase = ottieniVariabiliInBase();
     ArrayList<Double> ccr = ottieniCCR();
+    int count = 0;
 
     for (int i = 0; i < modello.getVars().length; i++) {
-      if (variabiliInBase.get(i) == 0 && Math.abs(ccr.get(i)) < epsilon) {
-        return "Sì";
+      if (variabiliInBase.get(i) == 0 && Math.abs(modello.getVar(i).get(GRB.DoubleAttr.RC)) < epsilon) {
+        count++;
+        System.out.println(modello.getVar(i).get(GRB.StringAttr.VarName) + " " + modello.getVar(i).get(GRB.DoubleAttr.X));
       }
     }
 
-    return "No";
+    return count > 0 ? "Sì" : "No";
   }
 
   /**
@@ -581,14 +570,17 @@ public class App {
   private static String isDegenere() throws GRBException {
 
     ArrayList<Integer> variabiliInBase = ottieniVariabiliInBase();
+    ArrayList<Double> ccr = ottieniCCR();
+    int count = 0;
 
     for (int i = 0; i < modello.getVars().length; i++) {
       if (variabiliInBase.get(i) == 1 && Math.abs(modello.getVar(i).get(GRB.DoubleAttr.X)) < epsilon) {
-        return "Sì";
+        count++;
+        System.out.println(modello.getVar(i).get(GRB.StringAttr.VarName) + " " + modello.getVar(i).get(GRB.DoubleAttr.X));
       }
     }
 
-    return "No";
+    return count > 0 ? "Sì" : "No";
   }
 
   /**

@@ -106,10 +106,9 @@ public class App2 {
   private static GRBVar a;
 
   // Utilizzare per risolvere il modello in FORMA STANDARD
-  /*
-   * private static int indiceSlack = 0;
-   * private static int indiceAusiliarie = 0;
-   */
+   private static int indiceSlack = 0;
+   private static int indiceAusiliarie = 0;
+
 
   // Variabili di utilità
   private static final double epsilon = 1e-5;
@@ -134,7 +133,9 @@ public class App2 {
       impostaVincoliDiTempo(modello);
 
       calcolaEStampa(modello);
+
       quesito3(modello);
+
     } catch (GRBException e) {
       System.out.println("Error code: " + e.getErrorCode() + ". " + e.getMessage());
     }
@@ -155,7 +156,7 @@ public class App2 {
 
     for (int i = 0; i < s.length; i++) {
       s[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "s" + (i + 1));
-      y[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "y" + (i + 1));
+      //y[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "y" + (i + 1));
     }
 
     // Inizializzazione della funzione obbiettivo
@@ -173,7 +174,18 @@ public class App2 {
     // obiettivo
     GRBLinExpr funzioneObiettivo = new GRBLinExpr();
 
+    // Aggiungo la variabile a all'espressione della funzione obiettivo
+    // (FORMA NON STANDARD)
     funzioneObiettivo.addTerm(1, a); // Aggiungo il termine 'a' alla funzione obiettivo
+
+
+    // Aggiungo le variabili y all'espressione della funzione obiettivo
+    // (METODO DELLE DUE FASI)
+    /*
+     *  for(int i = 0; i < y.length; i++){
+     *    funzioneObiettivo.addTerm(1, y[i]);
+     *  }
+     */
 
     modello.setObjective(funzioneObiettivo, GRB.MINIMIZE); // Imposto come funzione obiettivo del modello l'espressione
                                                            // lineare creata dicendo che voglio minimizzarla
@@ -200,23 +212,21 @@ public class App2 {
 
     // Aggiungo le variabili di slack/surplus e quelle ausiliarie alle rispettive
     // espressioni lineari (solo FORMA STANDARD)
-    /*
-     * vincoloModulo0.addTerm(1, s[indiceSlack++]);
-     * vincoloModulo0.addTerm(1, y[indiceAusiliarie++]);
-     * 
-     * vincoloModulo1.addTerm(1, s[indiceSlack++]);
-     * vincoloModulo1.addTerm(1, y[indiceAusiliarie++]);
-     */
+    //vincoloDiModulo0.addTerm(1, s[indiceSlack++]);
+    //vincoloDiModulo0.addTerm(1, y[indiceAusiliarie++]);
+
+    //vincoloDiModulo1.addTerm(1, s[indiceSlack++]);
+    //vincoloDiModulo1.addTerm(1, y[indiceAusiliarie++]);
 
     // Aggiungo i vincoli con il termine noto al modello (FORMA NON STANDARD)
-    modello.addConstr(vincoloDiModulo0, GRB.LESS_EQUAL, a, "Vincolo_di_modulo_0");
-    modello.addConstr(vincoloDiModulo1, GRB.LESS_EQUAL, a, "Vincolo_di_modulo_1");
-
-    // Aggiungo i vincoli con il termine noto al modello (solo FORMA STANDARD)
     /*
-     * modello.addConstr(vincoloModulo0, GRB.EQUAL, a, "Vincolo_di_modulo_0");
-     * modello.addConstr(vincoloModulo1, GRB.EQUAL, a, "Vincolo_di_modulo_1");
+     * modello.addConstr(vincoloDiModulo0, GRB.LESS_EQUAL, a, "Vincolo_di_modulo_0");
+     * modello.addConstr(vincoloDiModulo1, GRB.LESS_EQUAL, a, "Vincolo_di_modulo_1");
      */
+
+     // Aggiungo i vincoli con il termine noto al modello (solo FORMA STANDARD)
+     modello.addConstr(vincoloDiModulo0, GRB.EQUAL, a, "Vincolo_di_modulo_0");
+     modello.addConstr(vincoloDiModulo1, GRB.EQUAL, a, "Vincolo_di_modulo_1");
   }
 
   /**
@@ -238,18 +248,17 @@ public class App2 {
 
     // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione
     // lineare (FORMA STANDARD)
-    /*
-     * vincoloCopertura.addTerm(-1, s[indiceSlack++]);
-     * vincoloCopertura.addTerm(1, y[indiceAusiliarie++]);
-     */
+
+    //vincoloDiCopertura.addTerm(-1, s[indiceSlack++]);
+    //vincoloDiCopertura.addTerm(1, y[indiceAusiliarie++]);
 
     // Aggiungo il vincolo con il termine noto al modello (FORMA NON STANDARD)
-    modello.addConstr(vincoloDiCopertura, GRB.GREATER_EQUAL, S, "Vincolo_di_copertura");
+    /*
+     * modello.addConstr(vincoloDiCopertura, GRB.GREATER_EQUAL, S, "Vincolo_di_copertura");
+     */
 
     // Aggiungo il vincolo con il termine noto al modello (FORMA STANDARD)
-    /*
-     * modello.addConstr(vincoloDiCopertura, GRB.EQUAL, S, "Vincolo_di_copertura");
-     */
+    modello.addConstr(vincoloDiCopertura, GRB.EQUAL, S, "Vincolo_di_copertura");
   }
 
   /**
@@ -270,18 +279,16 @@ public class App2 {
 
       // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione
       // lineare (FORMA STANDARD)
-      /*
-       * vincoloCosto.addTerm(1, s[indiceSlack++]);
-       * vincoloCosto.addTerm(1, y[indiceAusiliarie++]);
-       */
+      //vincoloDiCosto.addTerm(1, s[indiceSlack++]);
+      //vincoloDiCosto.addTerm(1, y[indiceAusiliarie++]);
 
       // Aggiungo il vincolo con il termine noto al modello (FORMA NON STANDARD)
-      modello.addConstr(vincoloDiCosto, GRB.LESS_EQUAL, beta[i], "Vincolo_di_costo_" + i);
+      /*
+       * modello.addConstr(vincoloDiCosto, GRB.LESS_EQUAL, beta[i], "Vincolo_di_costo_" + i);
+       */
 
       // Aggiungo il vincolo con il termine noto al modello (FORMA STANDARD)
-      /*
-       * modello.addConstr(vincoloCosto, GRB.EQUAL, beta[i], "Vincolo_di_costo_" + i);
-       */
+      modello.addConstr(vincoloDiCosto, GRB.EQUAL, beta[i], "Vincolo_di_costo_" + i);
     }
   }
 
@@ -312,19 +319,17 @@ public class App2 {
 
       // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione
       // lineare (FORMA STANDARD)
-      /*
-       * vincoloConcorrenza.addTerm(-1, s[indiceSlack++]);
-       * vincoloConcorrenza.addTerm(1, y[indiceAusiliarie++]);
-       */
+      //vincoloDiBilancio.addTerm(-1, s[indiceSlack++]);
+      //vincoloDiBilancio.addTerm(1, y[indiceAusiliarie++]);
+
 
       // Aggiungo il vincolo con il termine noto al modello (FORMA NON STANDARD)
-      modello.addConstr(vincoloDiBilancio, GRB.GREATER_EQUAL, termineNoto, "Vincolo_di_budget_" + j);
+      /*
+       * modello.addConstr(vincoloDiBilancio, GRB.GREATER_EQUAL, termineNoto, "Vincolo_di_budget_" + j);
+       */
 
       // Aggiungo il vincolo con il termine noto al modello (FORMA STANDARD)
-      /*
-       * modello.addConstr(vincoloDiBilancio, GRB.EQUAL, termineNoto,
-       * "Vincolo_di_budget_" + j);
-       */
+      modello.addConstr(vincoloDiBilancio, GRB.EQUAL, termineNoto, "Vincolo_di_budget_" + j);
     }
   }
 
@@ -338,26 +343,24 @@ public class App2 {
     for (int j = 0; j < K; j++) {
       for (int i = 0; i < M; i++) {
         // Creo un'espressione lineare che andrà a rappresentare il vincolo di tempo
-        GRBLinExpr vincoloTempo = new GRBLinExpr();
+        GRBLinExpr vincoloDiTempo = new GRBLinExpr();
 
         // Aggiungo la variabile all'espressione lineare
-        vincoloTempo.addTerm(1, x[i + j + (M - 1) * j]);
+        vincoloDiTempo.addTerm(1, x[i + j + (M - 1) * j]);
 
         // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione
         // lineare (solo FORMA STANDARD)
-        /*
-         * vincoloTempo.addTerm(1, s[indiceSlack++]);
-         * vincoloTempo.addTerm(1, y[indiceAusiliarie++]);
-         */
+
+        //vincoloDiTempo.addTerm(1, s[indiceSlack++]);
+        //vincoloDiTempo.addTerm(1, y[indiceAusiliarie++]);
 
         // Aggiungo il vincolo con il termine noto al modello (FORMA NON STANDARD)
-        modello.addConstr(vincoloTempo, GRB.LESS_EQUAL, tau[i][j], "Vincolo_di_tempo_" + i + "" + j);
+        /*
+         * modello.addConstr(vincoloDiTempo, GRB.LESS_EQUAL, tau[i][j], "Vincolo_di_tempo_" + i + "" + j);
+         */
 
         // Aggiungo il vincolo con il termine noto al modello (FORMA STANDARD)
-        /*
-         * modello.addConstr(vincoloTempo, GRB.EQUAL, tau[i][j], "Vincolo_di_tempo_" + i
-         * + "" + j);
-         */
+        modello.addConstr(vincoloDiTempo, GRB.EQUAL, tau[i][j], "Vincolo_di_tempo_" + i + "" + j);
       }
     }
   }
@@ -511,10 +514,13 @@ public class App2 {
 
     ArrayList<String> variabiliBase = new ArrayList<>();
     String[] base = ottieniVariabiliBase(modello);
+    int i;
 
-    for (int i = 0; i < base.length; i++) {
+    for (i = 0; i < base.length; i++) {
       variabiliBase.add(String.format("%s", base[i]));
     }
+
+    System.out.println(i);
 
     return variabiliBase.toString();
   }
@@ -533,8 +539,9 @@ public class App2 {
 
     for (GRBVar x : modello.getVars()) {
       double valore = x.get(GRB.DoubleAttr.RC);
+      String nome = x.get(GRB.StringAttr.VarName);
 
-      costoRidotto.add(String.format("%.4f", valore));
+      costoRidotto.add(String.format("%s = %.4f", nome, valore));
     }
 
     return costoRidotto.toString();
@@ -549,6 +556,8 @@ public class App2 {
     for (int i = 0; i < modello.getVars().length; i++) {
       if (base[i] == 0 && Math.abs(modello.getVar(i).get(GRB.DoubleAttr.RC)) < epsilon) {
         count++;
+
+        System.out.println(modello.getVar(i).get(GRB.StringAttr.VarName) + " " + modello.getVar(i).get(GRB.DoubleAttr.RC));
       }
     }
 
@@ -569,8 +578,7 @@ public class App2 {
       if (var_in_base[i] == 1 && Math.abs(modello.getVar(i).get(GRB.DoubleAttr.X)) < epsilon) {
         count++;
 
-        System.out
-            .println(modello.getVar(i).get(GRB.StringAttr.VarName) + " " + modello.getVar(i).get(GRB.DoubleAttr.X));
+        System.out.println(modello.getVar(i).get(GRB.StringAttr.VarName) + " " + modello.getVar(i).get(GRB.DoubleAttr.X));
       }
     }
 
@@ -585,8 +593,10 @@ public class App2 {
 
     ArrayList<String> vincoliVerticeOttimo = new ArrayList<>();
 
+    int count = 1;
+
     for (var v : modello.getConstrs()) {
-      if (Math.abs(v.get(GRB.DoubleAttr.Slack)) < epsilon)
+      if(Math.abs(v.get(GRB.DoubleAttr.Slack)) < epsilon)
         vincoliVerticeOttimo.add(v.get(GRB.StringAttr.ConstrName));
     }
 
@@ -598,8 +608,8 @@ public class App2 {
     String[] variabiliBase = new String[modello.getVars().length];
     int i = 0;
 
+    //variabili con nome
     /*
-     * //variabili con nome
      * for (var v : modello.getVars()){
      * variabiliBase[i++] = (v.get(GRB.IntAttr.VBasis) == GRB.BASIC ?
      * String.format("%s = 1", v.get(GRB.StringAttr.VarName)) :
@@ -609,7 +619,9 @@ public class App2 {
 
     // variabili
     for (var v : modello.getVars()) {
-      variabiliBase[i++] = (v.get(GRB.IntAttr.VBasis) == GRB.BASIC ? "1" : "0");
+      variabiliBase[i++] = (v.get(GRB.IntAttr.VBasis) == GRB.BASIC ?
+              String.format("%s = 1", v.get(GRB.StringAttr.VarName)) :
+      String.format("%s = 0", v.get(GRB.StringAttr.VarName)));
     }
 
     return variabiliBase;
@@ -627,8 +639,43 @@ public class App2 {
     return variabiliBase;
   }
 
-  public static void quesito3(GRBModel modello) throws GRBException {
-/*
+  private static void quesito3(GRBModel modello) throws GRBException {
+
+    modello = new GRBModel(ambiente);
+    GRBLinExpr fasullo = new GRBLinExpr();
+    indiceSlack = 0;
+
+    inizializzaVariabili(modello);
+
+    fasullo.addTerm(1, s[0]);
+    modello.addConstr(fasullo, GRB.EQUAL, 100, "fasullo");
+
+
+
+    impostaFunzioneObiettivo(modello);
+
+    impostaVincoliDiModulo(modello);
+    impostaVincoliDiCopertura(modello);
+    impostaVincoliDiCosto(modello);
+    impostaVincoliDiBilancio(modello);
+    impostaVincoliDiTempo(modello);
+
+    modello.update();
+    modello.write("fasullo.lp");
+    modello.optimize();
+
+
+
+    System.out.println("\n\nGRUPPO 81\nComponenti: Brignoli Muscio\n\nQUESITO I:");
+    System.out.println("funzione obbiettivo = " + ottieniValoreFunzioneObbiettivo(modello));
+    System.out.println("copertura raggiunta totale (spettatori) = " + calcolaCoperturaRaggiuntaTotale(modello));
+    System.out.println("tempo acquistato (minuti) = " + calcolaTempoAcquistato(modello));
+    System.out.println("budget inutilizzato = " + calcolaBilancioInutilizzato(modello));
+    System.out.print("soluzione di base ottima:\n" + ottieniSoluzioneDiBaseOttima(modello));
+  }
+
+/*  public static void quesito3(GRBModel modello) throws GRBException {
+
     GRBModel modello1 = new GRBModel(ambiente); // Creo un modello vuoto utilizzando l'ambiente precedentemente creato
 
     inizializzaVariabili(modello1);
@@ -657,7 +704,7 @@ public class App2 {
     impostaVincoliDiCosto(modello1);
     impostaVincoliDiBilancio(modello1);
     impostaVincoliDiTempo(modello1);
-*/
+
     StringBuilder s1 = new StringBuilder();
 
     for (GRBVar x : modello.getVars()) {
@@ -675,7 +722,7 @@ public class App2 {
 //    modello.set();
 
     StringBuilder s2 = new StringBuilder();
-/*
+
     for (GRBVar x : modello.getVars()) {
       String nome = x.get(GRB.StringAttr.VarName);
       double valore = x.get(GRB.DoubleAttr.Xn);
@@ -683,7 +730,7 @@ public class App2 {
       s2.append(String.format("%s = %.4f ", nome, valore));
     }
 
-    System.out.println(s2);*/
+    System.out.println(s2);
 
     StringBuilder s3 = new StringBuilder();
 
@@ -704,6 +751,6 @@ public class App2 {
     }
 
     System.out.println(s3);
-  }
+  }*/
 
 }
