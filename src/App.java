@@ -106,10 +106,9 @@ public class App {
   private static GRBVar a;
 
   // Utilizzare per risolvere il modello in FORMA STANDARD
-  /*
-   * private static int indiceSlack = 0;
-   * private static int indiceAusiliarie = 0;
-   */
+   private static int indiceSlack = 0;
+   private static int indiceAusiliarie = 0;
+
 
   // Variabili di utilità
   /**
@@ -126,15 +125,11 @@ public class App {
 
       modello = new GRBModel(ambiente); // Creo un modello vuoto utilizzando l'ambiente precedentemente creato
 
-      inizializzaVariabili();
+      inizializzaVariabili(0);
 
       impostaFunzioneObiettivo();
 
-      impostaVincoliDiModulo();
-      impostaVincoliDiCopertura();
-      impostaVincoliDiCosto();
-      impostaVincoliDiBilancio();
-      impostaVincoliDiTempo();
+      impostaVincoli(0);
 
       calcolaEStampa();
     } catch (GRBException e) {
@@ -147,18 +142,23 @@ public class App {
    *
    * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
    */
-  private static void inizializzaVariabili() throws GRBException {
+  private static void inizializzaVariabili(int modalita) throws GRBException {
     // Inizializzazione delle incognite del modello
     for (int i = 0; i < x.length; i++) {
       x[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "x" + (i + 1));
     }
 
     // Inizializzazione delle slack/surplus e delle variabili ausiliarie del modello
-
-    /*for (int i = 0; i < s.length; i++) {
-      s[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "s" + (i + 1));
-      y[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "y" + (i + 1));
-    }*/
+    if (modalita == 1) {
+      for (int i = 0; i < s.length; i++) {
+        s[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "s" + (i + 1));
+      }
+    } else if (modalita == 2) {
+      for (int i = 0; i < s.length; i++) {
+        s[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "s" + (i + 1));
+        y[i] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "y" + (i + 1));
+      }
+    }
 
     // Inizializzazione della funzione obbiettivo
     a = modello.addVar(0.0, GRB.INFINITY, 0, GRB.CONTINUOUS, "a");
@@ -182,12 +182,17 @@ public class App {
   }
 
   /**
-   * Metodo che crea e imposta le due espressioni lineari rappresentanti i due
-   * vincoli derivanti dall'espressione dello scarto (modulo della differenza)
-   *
+   * Metodo per impostare tutti i vincoli del modello:
+   * - Vincoli di Modulo <br>
+   * - Vincoli di Copertura <br>
+   * - Vincoli di Costo <br>
+   * - Vincoli di Bilancio <br>
+   * - Vincoli di Tempo
+   * 
    * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
    */
-  private static void impostaVincoliDiModulo() throws GRBException {
+  private static void impostaVincoli(int modalita) throws GRBException {
+    // VINCOLI DI MODULO //
     // Creo due espressioni lineari che andranno a rappresentare i vincoli di moduli
     GRBLinExpr vincoloDiModulo0 = new GRBLinExpr();
     GRBLinExpr vincoloDiModulo1 = new GRBLinExpr();
@@ -200,34 +205,32 @@ public class App {
       }
     }
 
-    // Aggiungo le variabili di slack/surplus e quelle ausiliarie alle rispettive
-    // espressioni lineari (solo FORMA STANDARD)
-    /*
-     * vincoloModulo0.addTerm(1, s[indiceSlack++]);
-     * vincoloModulo0.addTerm(1, y[indiceAusiliarie++]);
-     * 
-     * vincoloModulo1.addTerm(1, s[indiceSlack++]);
-     * vincoloModulo1.addTerm(1, y[indiceAusiliarie++]);
-     */
+    // Aggiungo le variabili di slack/surplus e quelle ausiliarie alle rispettive espressioni lineari (solo FORMA STANDARD)
+    if(modalita == 1) {
+      vincoloDiModulo0.addTerm(1, s[indiceSlack++]);
+
+      vincoloDiModulo1.addTerm(1, s[indiceSlack++]);
+    } else if (modalita == 2) {
+      vincoloDiModulo0.addTerm(1, s[indiceSlack++]);
+      vincoloDiModulo0.addTerm(1, y[indiceAusiliarie++]);
+
+      vincoloDiModulo1.addTerm(1, s[indiceSlack++]);
+      vincoloDiModulo1.addTerm(1, y[indiceAusiliarie++]);
+    }
+
 
     // Aggiungo i vincoli con il termine noto al modello (FORMA NON STANDARD)
-    modello.addConstr(vincoloDiModulo0, GRB.LESS_EQUAL, a, "Vincolo_di_modulo_0");
-    modello.addConstr(vincoloDiModulo1, GRB.LESS_EQUAL, a, "Vincolo_di_modulo_1");
+    if(modalita == 0) {
+      modello.addConstr(vincoloDiModulo0, GRB.LESS_EQUAL, a, "Vincolo_di_modulo_0");
+      modello.addConstr(vincoloDiModulo1, GRB.LESS_EQUAL, a, "Vincolo_di_modulo_1");
+    } else {
+      // Aggiungo i vincoli con il termine noto al modello (solo FORMA STANDARD)
+      modello.addConstr(vincoloDiModulo0, GRB.EQUAL, a, "Vincolo_di_modulo_0");
+      modello.addConstr(vincoloDiModulo1, GRB.EQUAL, a, "Vincolo_di_modulo_1");
+    }
 
-    // Aggiungo i vincoli con il termine noto al modello (solo FORMA STANDARD)
-    /*
-     * modello.addConstr(vincoloModulo0, GRB.EQUAL, a, "Vincolo_di_modulo_0");
-     * modello.addConstr(vincoloModulo1, GRB.EQUAL, a, "Vincolo_di_modulo_1");
-     */
-  }
 
-  /**
-   * Metodo che crea e imposta l'espressione lineare rappresentante il vincolo di
-   * copertura
-   *
-   * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
-   */
-  private static void impostaVincoliDiCopertura() throws GRBException {
+    // VINCOLI DI COPERTURA //
     // Creo un'espressioni lineare che andrà a rappresentare il vincolo di copertura
     GRBLinExpr vincoloDiCopertura = new GRBLinExpr();
 
@@ -238,62 +241,76 @@ public class App {
       }
     }
 
-    // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione
-    // lineare (FORMA STANDARD)
-    /*
-     * vincoloCopertura.addTerm(-1, s[indiceSlack++]);
-     * vincoloCopertura.addTerm(1, y[indiceAusiliarie++]);
-     */
+    // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione lineare (FORMA STANDARD)
+    if (modalita == 1) {
+      vincoloDiCopertura.addTerm(-1, s[indiceSlack++]);
+    } else if (modalita == 2) {
+      vincoloDiCopertura.addTerm(-1, s[indiceSlack++]);
+      vincoloDiCopertura.addTerm(1, y[indiceAusiliarie++]);
+    }
+
 
     // Aggiungo il vincolo con il termine noto al modello (FORMA NON STANDARD)
-    modello.addConstr(vincoloDiCopertura, GRB.GREATER_EQUAL, S, "Vincolo_di_copertura");
-
-    // Aggiungo il vincolo con il termine noto al modello (FORMA STANDARD)
-    /*
-     * modello.addConstr(vincoloDiCopertura, GRB.EQUAL, S, "Vincolo_di_copertura");
-     */
-  }
-
-  /**
-   * Metodo che crea e imposta ogni singola espressione lineare rappresentante il
-   * singolo vincolo di costo
-   *
-   * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
-   */
-  private static void impostaVincoliDiCosto() throws GRBException {
-    for (int i = 0; i < M; i++) {
-      // Creo un'espressioni lineare che andrà a rappresentare il vincolo di costo
-      GRBLinExpr vincoloDiCosto = new GRBLinExpr();
-
-      // Aggiungo le variabili all'espressione lineare
-      for (int j = 0; j < K; j++) {
-        vincoloDiCosto.addTerm(C[i][j], x[i + j + (M - 1) * j]);
-      }
-
-      // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione
-      // lineare (FORMA STANDARD)
-      /*
-       * vincoloCosto.addTerm(1, s[indiceSlack++]);
-       * vincoloCosto.addTerm(1, y[indiceAusiliarie++]);
-       */
-
-      // Aggiungo il vincolo con il termine noto al modello (FORMA NON STANDARD)
-      modello.addConstr(vincoloDiCosto, GRB.LESS_EQUAL, beta[i], "Vincolo_di_costo_" + i);
-
+    if (modalita == 0) {
+      modello.addConstr(vincoloDiCopertura, GRB.GREATER_EQUAL, S, "Vincolo_di_copertura");
+    } else {
       // Aggiungo il vincolo con il termine noto al modello (FORMA STANDARD)
-      /*
-       * modello.addConstr(vincoloCosto, GRB.EQUAL, beta[i], "Vincolo_di_costo_" + i);
-       */
+       modello.addConstr(vincoloDiCopertura, GRB.EQUAL, S, "Vincolo_di_copertura");
     }
-  }
 
-  /**
-   * Metodo che crea e imposta ogni singola espressione lineare rappresentante il
-   * singolo vincolo di bilancio
-   *
-   * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
-   */
-  private static void impostaVincoliDiBilancio() throws GRBException {
+    // VINCOLI DI COSTO //
+    if (modalita == 0) {
+      for (int i = 0; i < M; i++) {
+        // Creo un'espressioni lineare che andrà a rappresentare il vincolo di costo
+        GRBLinExpr vincoloDiCosto = new GRBLinExpr();
+
+        // Aggiungo le variabili all'espressione lineare
+        for (int j = 0; j < K; j++) {
+          vincoloDiCosto.addTerm(C[i][j], x[i + j + (M - 1) * j]);
+        }
+
+        // Aggiungo il vincolo con il termine noto al modello (FORMA NON STANDARD)
+        modello.addConstr(vincoloDiCosto, GRB.LESS_EQUAL, beta[i], "Vincolo_di_costo_" + i);
+      }
+    } else if (modalita == 1) {
+      for (int i = 0; i < M; i++) {
+        // Creo un'espressioni lineare che andrà a rappresentare il vincolo di costo
+        GRBLinExpr vincoloDiCosto = new GRBLinExpr();
+
+        // Aggiungo le variabili all'espressione lineare
+        for (int j = 0; j < K; j++) {
+          vincoloDiCosto.addTerm(C[i][j], x[i + j + (M - 1) * j]);
+        }
+
+        // Aggiungo la variabile di slack/surplus all'espressione lineare (FORMA STANDARD)
+        vincoloDiCosto.addTerm(1, s[indiceSlack++]);
+
+        // Aggiungo il vincolo con il termine noto al modello (FORMA STANDARD)
+         modello.addConstr(vincoloDiCosto, GRB.EQUAL, beta[i], "Vincolo_di_costo_" + i);
+
+      }
+    } else {
+      for (int i = 0; i < M; i++) {
+        // Creo un'espressioni lineare che andrà a rappresentare il vincolo di costo
+        GRBLinExpr vincoloDiCosto = new GRBLinExpr();
+
+        // Aggiungo le variabili all'espressione lineare
+        for (int j = 0; j < K; j++) {
+          vincoloDiCosto.addTerm(C[i][j], x[i + j + (M - 1) * j]);
+        }
+
+        // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione
+        // lineare (FORMA STANDARD)
+        vincoloDiCosto.addTerm(1, s[indiceSlack++]);
+        vincoloDiCosto.addTerm(1, y[indiceAusiliarie++]);
+
+
+        // Aggiungo il vincolo con il termine noto al modello (FORMA STANDARD)
+        modello.addConstr(vincoloDiCosto, GRB.EQUAL, beta[i], "Vincolo_di_costo_" + i);
+      }
+    }
+
+    // VINCOLI DI BILANCIO //
     // Creo un double che andrà a rappresentare il termine noto dei vincoli
     double termineNoto = 0.0;
 
@@ -303,63 +320,101 @@ public class App {
     }
     termineNoto *= omega;
 
-    for (int j = 0; j < K; j++) {
-      // Creo un'espressioni lineare che andrà a rappresentare il vincolo di bilancio
-      GRBLinExpr vincoloDiBilancio = new GRBLinExpr();
+    if (modalita == 0) {
+      for (int j = 0; j < K; j++) {
+        // Creo un'espressioni lineare che andrà a rappresentare il vincolo di bilancio
+        GRBLinExpr vincoloDiBilancio = new GRBLinExpr();
 
-      // Aggiungo le variabili all'espressione lineare
-      for (int i = 0; i < M; i++) {
-        vincoloDiBilancio.addTerm(C[i][j], x[i + j + (M - 1) * j]);
-      }
-
-      // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione
-      // lineare (FORMA STANDARD)
-      /*
-       * vincoloConcorrenza.addTerm(-1, s[indiceSlack++]);
-       * vincoloConcorrenza.addTerm(1, y[indiceAusiliarie++]);
-       */
-
-      // Aggiungo il vincolo con il termine noto al modello (FORMA NON STANDARD)
-      modello.addConstr(vincoloDiBilancio, GRB.GREATER_EQUAL, termineNoto, "Vincolo_di_budget_" + j);
-
-      // Aggiungo il vincolo con il termine noto al modello (FORMA STANDARD)
-      /*
-       * modello.addConstr(vincoloDiBilancio, GRB.EQUAL, termineNoto,
-       * "Vincolo_di_budget_" + j);
-       */
-    }
-  }
-
-  /**
-   * Metodo che crea e imposta ogni singola espressione lineare rappresentante il
-   * singolo vincolo di tempo
-   *
-   * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
-   */
-  private static void impostaVincoliDiTempo() throws GRBException {
-    for (int j = 0; j < K; j++) {
-      for (int i = 0; i < M; i++) {
-        // Creo un'espressione lineare che andrà a rappresentare il vincolo di tempo
-        GRBLinExpr vincoloTempo = new GRBLinExpr();
-
-        // Aggiungo la variabile all'espressione lineare
-        vincoloTempo.addTerm(1, x[i + j + (M - 1) * j]);
-
-        // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione
-        // lineare (solo FORMA STANDARD)
-        /*
-         * vincoloTempo.addTerm(1, s[indiceSlack++]);
-         * vincoloTempo.addTerm(1, y[indiceAusiliarie++]);
-         */
+        // Aggiungo le variabili all'espressione lineare
+        for (int i = 0; i < M; i++) {
+          vincoloDiBilancio.addTerm(C[i][j], x[i + j + (M - 1) * j]);
+        }
 
         // Aggiungo il vincolo con il termine noto al modello (FORMA NON STANDARD)
-        modello.addConstr(vincoloTempo, GRB.LESS_EQUAL, tau[i][j], "Vincolo_di_tempo_" + i + "" + j);
+        modello.addConstr(vincoloDiBilancio, GRB.GREATER_EQUAL, termineNoto, "Vincolo_di_budget_" + j);
+      }
+    } else if (modalita == 1) {
+      for (int j = 0; j < K; j++) {
+        // Creo un'espressioni lineare che andrà a rappresentare il vincolo di bilancio
+        GRBLinExpr vincoloDiBilancio = new GRBLinExpr();
+
+        // Aggiungo le variabili all'espressione lineare
+        for (int i = 0; i < M; i++) {
+          vincoloDiBilancio.addTerm(C[i][j], x[i + j + (M - 1) * j]);
+        }
+
+        // Aggiungo la variabile di slack/surplus all'espressione lineare (FORMA STANDARD)
+        vincoloDiBilancio.addTerm(-1, s[indiceSlack++]);
 
         // Aggiungo il vincolo con il termine noto al modello (FORMA STANDARD)
-        /*
-         * modello.addConstr(vincoloTempo, GRB.EQUAL, tau[i][j], "Vincolo_di_tempo_" + i
-         * + "" + j);
-         */
+         modello.addConstr(vincoloDiBilancio, GRB.EQUAL, termineNoto, "Vincolo_di_budget_" + j);
+      }
+    } else {
+      for (int j = 0; j < K; j++) {
+        // Creo un'espressioni lineare che andrà a rappresentare il vincolo di bilancio
+        GRBLinExpr vincoloDiBilancio = new GRBLinExpr();
+
+        // Aggiungo le variabili all'espressione lineare
+        for (int i = 0; i < M; i++) {
+          vincoloDiBilancio.addTerm(C[i][j], x[i + j + (M - 1) * j]);
+        }
+
+        // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione lineare (FORMA STANDARD)
+        vincoloDiBilancio.addTerm(-1, s[indiceSlack++]);
+        vincoloDiBilancio.addTerm(1, y[indiceAusiliarie++]);
+
+        // Aggiungo il vincolo con il termine noto al modello (FORMA STANDARD)
+        modello.addConstr(vincoloDiBilancio, GRB.EQUAL, termineNoto, "Vincolo_di_budget_" + j);
+      }
+    }
+
+    // VINCOLI DI TEMPO //
+    if (modalita == 0) {
+      for (int j = 0; j < K; j++) {
+        for (int i = 0; i < M; i++) {
+          // Creo un'espressione lineare che andrà a rappresentare il vincolo di tempo
+          GRBLinExpr vincoloDiTempo = new GRBLinExpr();
+
+          // Aggiungo la variabile all'espressione lineare
+          vincoloDiTempo.addTerm(1, x[i + j + (M - 1) * j]);
+
+          // Aggiungo il vincolo con il termine noto al modello (FORMA NON STANDARD)
+          modello.addConstr(vincoloDiTempo, GRB.LESS_EQUAL, tau[i][j], "Vincolo_di_tempo_" + i + "" + j);
+        }
+      }
+    } else if (modalita == 1) {
+      for (int j = 0; j < K; j++) {
+        for (int i = 0; i < M; i++) {
+          // Creo un'espressione lineare che andrà a rappresentare il vincolo di tempo
+          GRBLinExpr vincoloDiTempo = new GRBLinExpr();
+
+          // Aggiungo la variabile all'espressione lineare
+          vincoloDiTempo.addTerm(1, x[i + j + (M - 1) * j]);
+
+          // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione lineare (solo FORMA STANDARD)
+           vincoloDiTempo.addTerm(1, s[indiceSlack++]);
+
+          // Aggiungo il vincolo con il termine noto al modello (FORMA STANDARD)
+          modello.addConstr(vincoloDiTempo, GRB.EQUAL, tau[i][j], "Vincolo_di_tempo_" + i + "" + j);
+        }
+      }
+    } else {
+      for (int j = 0; j < K; j++) {
+        for (int i = 0; i < M; i++) {
+          // Creo un'espressione lineare che andrà a rappresentare il vincolo di tempo
+          GRBLinExpr vincoloDiTempo = new GRBLinExpr();
+
+          // Aggiungo la variabile all'espressione lineare
+          vincoloDiTempo.addTerm(1, x[i + j + (M - 1) * j]);
+
+          // Aggiungo la variabile di slack/surplus e quella ausiliaria all'espressione lineare (solo FORMA STANDARD)
+          vincoloDiTempo.addTerm(1, s[indiceSlack++]);
+          vincoloDiTempo.addTerm(1, y[indiceAusiliarie++]);
+
+
+          // Aggiungo il vincolo con il termine noto al modello (FORMA STANDARD)
+          modello.addConstr(vincoloDiTempo, GRB.EQUAL, tau[i][j], "Vincolo_di_tempo_" + i + "" + j);
+        }
       }
     }
   }
