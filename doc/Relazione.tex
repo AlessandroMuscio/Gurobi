@@ -10,7 +10,8 @@
 % Imposto il formato, dimensioni totali, margini 
 \usepackage[a4paper,total={180mm, 267mm},left=14mm,top=5mm]{geometry}
 % I prime tre pacchetti ti fanno fare tutte le equazione super belle con i simboli belli, il 4° vedi dopo
-\usepackage{amsfonts, amsmath, amssymb, fancyhdr}
+\usepackage{amsfonts, amssymb, fancyhdr}
+\usepackage{amsmath}
 
 % Le impostazioni di indentazione di default di LaTeX sono strane, questo le rimuove
 \setlength{\parindent}{0pt}
@@ -30,20 +31,12 @@
   \begin{center}
     % \Large o \small aumentano il font di quell che viene dopo, \textbf{} è il grassetto.
     % In LaTeX per andare a capo bisogna lasciare una linea vuota, oppure inserire \\ a fine riga
-    \Large\textbf{Relazione Progetto Gurobi}
+    \Large\textbf{Relazione Progetto Gurobi - Parte Prima}
 
     \small Gruppo N° 81: Brignoli Muscio
   \end{center}\bigskip
 
-  La prima cosa che abbiamo fatto è stato costruire la funzione obiettivo del modello e, capito che dovevamo \textit{minimizzare} lo scarto, abbiamo definito questa funzione:
-  \begin{equation*}
-    min\quad\left|\sum_{j=1}^{\frac{K}{2}}\sum_{i=1}^{M}P_{ij}\,x_{ij}-\sum_{j=\frac{K}{2}+1}^{K}\sum_{i=1}^{M}P_{ij}\,x_{ij}\right|
-  \end{equation*}
-  Dove $x_{ij}$ rappresenta la matrice delle incognite popolata per colonne.
-
-  Essendo che la funzione presentava un modulo abbiamo creato la variabile $a$ per rappresentarla ed inserito i due vincoli che sarebbero andati a sciogliere il modulo e i restanti vincoli.
-
-  Quindi, abbiamo costruito questo modello:
+  Segue il modello formulato per il problema assegnatoci:
   \begin{gather*}
     min\quad a \\
     \sum_{j=1}^{\frac{K}{2}}\sum_{i=1}^{M}P_{ij}\,x_{ij}-\sum_{j=\frac{K}{2}+1}^{K}\sum_{i=1}^{M}P_{ij}\,x_{ij}\leq a \\
