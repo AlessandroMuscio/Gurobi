@@ -783,6 +783,7 @@ public class AppFormaCanonica {
       }
     }
 
+
     return soluzione.toString();
   }
 
