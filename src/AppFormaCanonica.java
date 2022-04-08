@@ -789,7 +789,7 @@ public class AppFormaCanonica {
     impostaVincoli(1);
 
     GRBLinExpr e = new GRBLinExpr();
-    e.addTerm(1, s[0]);
+    e.addTerm(1, s[3]);
     modello.addConstr(e,GRB.EQUAL, 100, "fasullo");
 
     modello.update();

@@ -1,0 +1,12 @@
+QUESITO III:
+soluzione 1:
+come prima soluzione non ottima ammissibile abbiamo calcolato la combinazione convessa di uno dei vertici,
+determinando q valori {lambda simbolo} di sommatoria 1, per poi utilizzarli nella combinazione convessa.
+soluzione 2:
+come seconda soluzione non ottima ammissibile abbiamo sfruttato il problema risolto in forma standard, a cui
+abbiamo valorizzato la slack di uno dei vincoli che identifica il vertice ottimo ad un valore positivo non nullo.
+Nel nostro caso abbiamo scelto di modificare s[3], associata al primo vincolo di costo, e l'abbiamo valorizzata a 100.
+solzuione 3:
+come terza soluzione non ottima ammissibile abbiamo risolto il problema con il metodo delle due fasi, fermandoci alla
+prima fase, ottenendo così un punto da cui partire per la risoluzione del problema applicando il simplesso, che è una
+soluzione non ottima ammissibile.
