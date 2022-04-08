@@ -1,5 +1,5 @@
 % Il documento è un article, LaTeX ha delle classi standard che impostano già dei parametri per te, in più gli ho aumentato la grandezza al font così arriviamo prima ad una pagina ;)
-\documentclass[11pt]{article}
+\documentclass[12pt]{article}
 
 % Imposto la codifica del file ad UTF-8
 \usepackage[utf8]{inputenc}
@@ -8,7 +8,7 @@
 % Questo ho capito che imposta la codifica del font ma non so cosa sia T1
 \usepackage[T1]{fontenc}
 % Imposto il formato, dimensioni totali, margini 
-\usepackage[a4paper,total={180mm, 267mm},left=14mm,top=10mm]{geometry}
+\usepackage[a4paper,total={180mm, 267mm},left=14mm,top=20mm]{geometry}
 % I prime tre pacchetti ti fanno fare tutte le equazione super belle con i simboli belli, il 4° vedi dopo
 \usepackage{amsfonts, amssymb, fancyhdr}
 \usepackage{amsmath}
@@ -47,8 +47,17 @@
     x_{ij}\leq \tau_{ij} \\
     x_{ij}\geq 0
   \end{gather*}
-  \hfill$\forall i,\:j\in\mathbb{N}:1\leq i\leq M\wedge1\leq j\leq K$\bigskip
+  \hfill$\forall i,\:j\in\mathbb{N}:1\leq i\leq M\wedge1\leq j\leq K$
 
+  \section*{Spiegazioni Quesito III}
+  {\Large\bfseries Procedura 1}\\
+  Come prima procedura per trovare una soluzione non ottima ammissibile al problema abbiamo preso uno dei vertici ottimi trovati e abbiamo determinando così un vettore $\lambda_i$ di $q$ valori tale che ${\displaystyle\sum_{i=1}^q}\lambda_i=1$ in modo da poterli così utilizzare in una \textbf{combinazione convessa} di questo vertice.\bigskip\bigskip
+  
+  {\Large\bfseries Procedura 2}\\
+  Come seconda procedura abbiamo sfruttato il problema risolto in \textbf{forma standard} per poi valorizzare una delle slack di uno dei vincoli che intercettasse il vertice ottimo ad un valore non nullo maggiore di zero.\\
+  Nel nostro caso specifico abbiamo scelto di valorizzare $s_3$, variabile di slack associata al primo vincolo di costo, a $100$.\bigskip\bigskip
 
-
+  {\Large\bfseries Procedura 3}\\
+  Come terza ed ultima procedura per trovare una soluzione non ottima ammissibile al problema abbiamo deciso di risolverlo utilizzando il metodo delle \textbf{due fasi} fermandoci, pe rò, alla fase uno.\\
+  In questo modo abbiamo ottenuto un punto da cui partire per risolverle il problema utilizzando il simplesso cioè una soluzione ammissibile non ottima.
 \end{document}
