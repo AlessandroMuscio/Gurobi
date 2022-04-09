@@ -33,7 +33,7 @@
     % In LaTeX per andare a capo bisogna lasciare una linea vuota, oppure inserire \\ a fine riga
     \Large\textbf{Relazione Progetto Gurobi - Parte Prima}
 
-    \small Gruppo N° 81: Brignoli Muscio
+    \small Coppia N° 81: Brignoli Muscio
   \end{center}\bigskip
 
   Segue il modello formulato per il problema assegnatoci:
@@ -51,13 +51,14 @@
 
   \section*{Spiegazioni Quesito III}
   {\Large\bfseries Procedura 1}\\
-  Come prima procedura per trovare una soluzione non ottima ammissibile al problema abbiamo preso uno dei vertici ottimi trovati e abbiamo determinando così un vettore $\lambda_i$ di $q$ valori tale che ${\displaystyle\sum_{i=1}^q}\lambda_i=1$ in modo da poterli così utilizzare in una \textbf{combinazione convessa} di questo vertice.\bigskip\bigskip
+  Come prima procedura per trovare una soluzione non ottima ammissibile al problema abbiamo preso uno dei vertici ottimi trovati e abbiamo determinando così un vettore $\boldsymbol{\lambda}$ di $q$ valori tale che \\ 
+  $\boldsymbol{\lambda}={\displaystyle\sum_{i=1}^q}\lambda_i=1$ in modo da poterli così utilizzare in una \textbf{combinazione convessa} di questo vertice.\bigskip\bigskip
   
   {\Large\bfseries Procedura 2}\\
-  Come seconda procedura abbiamo sfruttato il problema risolto in \textbf{forma standard} per poi valorizzare una delle slack di uno dei vincoli che intercettasse il vertice ottimo ad un valore non nullo maggiore di zero.\\
+  Come seconda procedura abbiamo sfruttato il problema risolto in \textbf{forma standard} per poi valorizzare una delle slack di uno dei vincoli che identificano il vertice ottimo ad un valore non nullo maggiore di zero.\\
   Nel nostro caso specifico abbiamo scelto di valorizzare $s_3$, variabile di slack associata al primo vincolo di costo, a $100$.\bigskip\bigskip
 
   {\Large\bfseries Procedura 3}\\
-  Come terza ed ultima procedura per trovare una soluzione non ottima ammissibile al problema abbiamo deciso di risolverlo utilizzando il metodo delle \textbf{due fasi} fermandoci, pe rò, alla fase uno.\\
+  Come terza ed ultima procedura per trovare una soluzione non ottima ammissibile al problema abbiamo deciso di risolverlo utilizzando il metodo delle \textbf{due fasi} fermandoci, però, alla fase uno.\\
   In questo modo abbiamo ottenuto un punto da cui partire per risolverle il problema utilizzando il simplesso cioè una soluzione ammissibile non ottima.
 \end{document}
