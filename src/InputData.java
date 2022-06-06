@@ -12,19 +12,36 @@ public class InputData {
   public int l;
   public int[][] graph;
 
-  public InputData(int v, int a, int[] b1b2, int c, int[] d1d2, int[] e1e2, int[] f1f2, int[] g1g2,
-      int[] h1h2, int[] i1i2, int l, int[][] graph) {
-    this.v = v;
-    this.a = a;
-    this.b1b2 = b1b2;
-    this.c = c;
-    this.d1d2 = d1d2;
-    this.e1e2 = e1e2;
-    this.f1f2 = f1f2;
-    this.g1g2 = g1g2;
-    this.h1h2 = h1h2;
-    this.i1i2 = i1i2;
-    this.l = l;
-    this.graph = graph;
+  @Override
+  public String toString() {
+    StringBuffer out = new StringBuffer();
+
+    out.append(String.format("v = %d\n", v));
+    out.append(String.format("a = %d\n", a));
+    out.append(String.format("(b1, b2) = (%d, %d)\n", b1b2[0], b1b2[1]));
+    out.append(String.format("c = %d\n", c));
+    out.append(String.format("(d1, d2) = (%d, %d)\n", d1d2[0], d1d2[1]));
+    out.append(String.format("(e1, e2) = (%d, %d)\n", e1e2[0], e1e2[1]));
+    out.append(String.format("(f1, f2) = (%d, %d)\n", f1f2[0], f1f2[1]));
+    out.append(String.format("(g1, g2) = (%d, %d)\n", g1g2[0], g1g2[1]));
+    out.append(String.format("(h1, h2) = (%d, %d)\n", h1h2[0], h1h2[1]));
+    out.append(String.format("(i1, i2) = (%d, %d)\n", i1i2[0], i1i2[1]));
+    out.append(String.format("l = %d\n", l));
+
+    out.append("\nGrafo\n");
+    for (int i = 0; i < graph.length; i++) {
+      StringBuffer line = new StringBuffer();
+
+      for (int j = 0; j < graph[i].length; j++)
+        if (j != (graph[i].length - 1))
+          line.append(String.format("%d\t", graph[i][j]));
+        else
+          line.append(String.format("%d", graph[i][j]));
+
+      line.append("\n");
+      out.append(line);
+    }
+
+    return out.toString();
   }
 }
