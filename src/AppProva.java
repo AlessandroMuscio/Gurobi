@@ -238,7 +238,7 @@ public class AppProva {
                     vincoloB.addTerm(-C[i][j], x[i][j]);
             }
         }
-        modello.addConstr(vincoloB, GRB.GREATER_EQUAL, -dati.c, "VincoloB_02");
+        modello.addConstr(vincoloB, GRB.GREATER_EQUAL, -N*N, "VincoloB_02");
 
 
         GRBLinExpr vincoloC = new GRBLinExpr();
@@ -281,7 +281,7 @@ public class AppProva {
         vincoloD.addTerm(-1, x[dati.g1g2[0]][dati.g1g2[1]]);
         vincoloD.addTerm(-1, x[dati.h1h2[0]][dati.h1h2[1]]);
         vincoloD.addTerm(-1, x[dati.i1i2[0]][dati.i1i2[1]]);
-        modello.addConstr(vincoloD, GRB.GREATER_EQUAL, -1, "VincoloD_03");
+        modello.addConstr(vincoloD, GRB.GREATER_EQUAL, -2, "VincoloD_03");
     }
 
     private static void percorsoOttimo(int col, LinkedList<Integer> percorsoOttimo) {
@@ -371,8 +371,7 @@ public class AppProva {
             percorsoOttimo(0, percorsoOttimo);
 
             System.out.println(percorsoOttimo);
-
-            System.out.println(dati.c);
+            System.out.println(modello.get(GRB.DoubleAttr.ObjVal));
 
         } catch (GRBException e) {
             e.printStackTrace();
