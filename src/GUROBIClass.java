@@ -3,6 +3,8 @@ import gurobi.*;
 public class GUROBIClass extends GRBCallback {
     private GRBVar[][] vars;
 
+    private static double vCosti[] = {1, 2, 100, 100, 100, 100, 1, 1, 100, 3};
+
     public GUROBIClass(GRBVar[][] xvars) {
         vars = xvars;
     }
@@ -127,9 +129,7 @@ public class GUROBIClass extends GRBCallback {
 
             for (int i = 0; i < n; i++)
                 for (int j = 0; j <= i; j++) {
-                    vars[i][j] = model.addVar(0.0, 1.0, distance(x, y, i, j),
-                            GRB.BINARY,
-                            "x"+String.valueOf(i)+"_"+String.valueOf(j));
+                    //vars[i][j] = model.addVar(0.0, 1.0, vCosti[i][j], GRB.BINARY, "x"+String.valueOf(i)+"_"+String.valueOf(j));
                     vars[j][i] = vars[i][j];
                 }
 
