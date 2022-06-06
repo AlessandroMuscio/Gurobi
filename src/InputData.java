@@ -1,4 +1,5 @@
 public class InputData {
+  public int N;
   public int v;
   public int a;
   public int[] b1b2;

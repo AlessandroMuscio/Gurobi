@@ -139,6 +139,7 @@ public class Reader {
                 case 11:
                   tmp = line.replaceAll(removeCharRegex, "");
                   dim = Integer.parseInt(tmp);
+                  inputData.N = dim;
                   inputData.graph = new int[dim][dim];
                   break;
               }
