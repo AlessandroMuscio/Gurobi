@@ -179,16 +179,30 @@ public class AppProva {
             percorsoOttimo.add(0);
             percorsoOttimo(0, percorsoOttimo);
 
+            System.out.println(modello.get(GRB.DoubleAttr.ObjVal));
             System.out.println(percorsoOttimo);
 
             modello = new GRBModel(ambiente); // Creo un modello vuoto utilizzando l'ambiente precedentemente creato
+            modello.set(GRB.IntParam.PoolSearchMode, 2);
+            modello.set(GRB.IntParam.SolutionNumber, 1);
 
             inizializzaMatrice();
             inizializzaVariabili();
             impostaFunzioneObiettivo();
             impostaVincoli();
 
-            //modello.set(GRB.IntAttr.Po);
+            modello.update();
+            modello.optimize();
+            modello.write("App.lp");
+
+            A = modello.get(GRB.DoubleAttr.X, x);
+
+            percorsoOttimo = new LinkedList<Integer>();
+            percorsoOttimo.add(0);
+            percorsoOttimo(0, percorsoOttimo);
+
+            System.out.println(percorsoOttimo);
+
 
         } catch (GRBException e) {
             e.printStackTrace();
