@@ -77,7 +77,7 @@ public class AppProva {
     GRBLinExpr vincoloDiUguaglianza0;
     GRBLinExpr vincoloDiUguaglianza1;
 
-    for (int j = 0; j < x[0].length; j++) {
+    for (int j = 0; j < x.length; j++) {
       vincoloDiUguaglianza0 = new GRBLinExpr();
 
       for (int i = 0; i < x.length; i++) {
@@ -279,7 +279,6 @@ public class AppProva {
 
       modello.update();
       modello.optimize();
-      modello.write("App.lp");
 
       inizializzaMatricePercorsoOttimo();
 
@@ -293,6 +292,8 @@ public class AppProva {
       // QUESITO I - Fine
 
       // QUESITO II - Inizio
+      int costo = (int) modello.get(GRB.DoubleAttr.ObjVal);
+
       modello = new GRBModel(ambiente); // Creo un modello vuoto utilizzando l'ambiente precedentemente creato
       modello.set(GRB.IntParam.PoolSearchMode, 2);
       modello.set(GRB.IntParam.SolutionNumber, 1);
@@ -303,17 +304,22 @@ public class AppProva {
 
       modello.update();
       modello.optimize();
-      modello.write("App.lp");
 
-      inizializzaMatricePercorsoOttimo();
+      if( costo == (int) modello.get(GRB.DoubleAttr.PoolObjVal) ){
 
-      percorsoOttimo = new LinkedList<Integer>();
-      percorsoOttimo.add(0);
-      percorsoOttimo(0, percorsoOttimo);
+        inizializzaMatricePercorsoOttimo();
 
-      System.out.println("\nQUESITO II:");
-      System.out.println(String.format("funzione obbiettivo = %.2f", modello.get(GRB.DoubleAttr.ObjVal)));
-      System.out.println("ciclo ottimo 2 = " + percorsoOttimo);
+        percorsoOttimo = new LinkedList<Integer>();
+        percorsoOttimo.add(0);
+        percorsoOttimo(0, percorsoOttimo);
+
+        System.out.println("\nQUESITO II:");
+        System.out.println("ciclo ottimo 2 = " + percorsoOttimo);
+      }
+      else{
+        System.out.println("\nQUESITO II:");
+        System.out.println("ciclo ottimo 2 = [Non esiste un ulteriore ciclo ottimo a costo uguale]");
+      }
       // QUESITO II - Fine
 
       // QUESITO III - Inizio
@@ -328,7 +334,6 @@ public class AppProva {
 
       modello.update();
       modello.optimize();
-      modello.write("App.lp");
 
       inizializzaMatricePercorsoOttimo();
 
@@ -338,7 +343,7 @@ public class AppProva {
 
       System.out.println("\nQUESITO III:");
       System.out.println(String.format("funzione obbiettivo = %.2f", modello.get(GRB.DoubleAttr.ObjVal)));
-      System.out.println("ciclo ottimo 1 = " + percorsoOttimo);
+      System.out.println("ciclo ottimo 3 = " + percorsoOttimo);
       // QUESITO III - Fine
     } catch (GRBException | IOException e) {
       e.printStackTrace();

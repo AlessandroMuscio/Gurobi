@@ -159,27 +159,6 @@ public class Reader {
       } else {
         eof = true;
       }
-
-      /*
-       * if (i == 13) {
-       * int dim = Integer.parseInt(line.replaceAll("(?i)[a-z ]", ""));
-       * graph = new int[dim][dim];
-       * }
-       * 
-       * if (i > 13)
-       * if (line != null) {
-       * String[] rowColVal = line.split(" ");
-       * int row = Integer.parseInt(rowColVal[0]);
-       * int col = Integer.parseInt(rowColVal[1]);
-       * int val = Integer.parseInt(rowColVal[2]);
-       * 
-       * graph[row][col] = val;
-       * graph[col][row] = val;
-       * } else {
-       * eof = true;
-       * }
-       * i++;
-       */
     }
 
     return inputData;
