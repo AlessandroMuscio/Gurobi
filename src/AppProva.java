@@ -20,10 +20,9 @@ public class AppProva {
    */
   private static GRBVar[][] x;
 
-  private static GRBVar w;
-  private static GRBVar f;
-  private static GRBVar k;
-  private static GRBVar temp;
+  private static GRBVar verticiEF;
+  private static GRBVar verticiGHI;
+  private static GRBVar costoAggiuntivo;
 
   /**
    * Variabile che rappresenta le incognite del modello
@@ -61,31 +60,24 @@ public class AppProva {
    * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
    */
   private static void impostaFunzioneObiettivo() throws GRBException {
-    // Creo un'espressione lineare che andrà a rappresentare la mia funzione
-    // obiettivo
     GRBLinExpr funzioneObiettivo = new GRBLinExpr();
 
     for (int i = 0; i < x.length; i++) {
       for (int j = 0; j < x[0].length; j++) {
         if (i != j)
-          funzioneObiettivo.addTerm(dati.graph[i][j], x[i][j]);
+          funzioneObiettivo.addTerm(dati.costi[i][j], x[i][j]);
       }
     }
 
-    // Imposto come funzione obiettivo del modello l'espressione lineare creata
-    // dicendo che voglio minimizzarla
     modello.setObjective(funzioneObiettivo, GRB.MINIMIZE);
   }
 
   private static void impostaVincoli() throws GRBException {
-    // VINCOLI DI MODULO //
-    // Creo due espressioni lineari che andranno a rappresentare i vincoli di moduli
+    // Vincoli di Uguaglianza -- Inizio
     GRBLinExpr vincoloDiUguaglianza0;
     GRBLinExpr vincoloDiUguaglianza1;
 
-    // Aggiungo le variabili alle rispettive espressioni lineari
     for (int j = 0; j < x[0].length; j++) {
-
       vincoloDiUguaglianza0 = new GRBLinExpr();
 
       for (int i = 0; i < x.length; i++) {
@@ -95,9 +87,7 @@ public class AppProva {
       modello.addConstr(vincoloDiUguaglianza0, GRB.EQUAL, 1, "Vincolo_di_uguaglianza_0_" + j);
     }
 
-    // Aggiungo le variabili alle rispettive espressioni lineari
     for (int i = 0; i < x.length; i++) {
-
       vincoloDiUguaglianza1 = new GRBLinExpr();
 
       for (int j = 0; j < x[0].length; j++) {
@@ -106,50 +96,43 @@ public class AppProva {
       }
       modello.addConstr(vincoloDiUguaglianza1, GRB.EQUAL, 1, "Vincolo_di_uguaglianza_1_" + i);
     }
+    // Vincoli di Uguaglianza -- Fine
 
-    GRBLinExpr vincoloStoCazzo;
+    // Vincoli MTZ -- Inizio
+    GRBLinExpr vincoliMTZ;
 
     for (int i = 2; i < u.length; i++) {
-
       for (int j = 2; j < u.length; j++) {
-
         if (i != j) {
+          vincoliMTZ = new GRBLinExpr();
 
-          vincoloStoCazzo = new GRBLinExpr();
+          vincoliMTZ.addTerm(1, u[i - 1]);
+          vincoliMTZ.addTerm(-1, u[j - 1]);
+          vincoliMTZ.addTerm((dati.N - 1), x[i][j]);
 
-          vincoloStoCazzo.addTerm(1, u[i - 1]);
-          vincoloStoCazzo.addTerm(-1, u[j - 1]);
-          vincoloStoCazzo.addTerm((dati.N - 1), x[i][j]);
-
-          modello.addConstr(vincoloStoCazzo, GRB.LESS_EQUAL, dati.N - 2, "Vincolo_di_stocazzo_" + i + "_" + j);
-
+          modello.addConstr(vincoliMTZ, GRB.LESS_EQUAL, dati.N - 2, "Vincolo_di_stocazzo_" + i + "_" + j);
         }
       }
     }
+    // Vincoli MTZ -- Fine
   }
 
   private static void inizializzaVariabiliAggiuntive() throws GRBException {
-
     for (int i = 0; i < x.length; i++) {
       for (int j = 0; j < x[0].length; j++) {
-        x[i][j] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.BINARY,
-            String.format("x%02d_%02d", (i + 1), (j + 1)));
+        x[i][j] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.BINARY, String.format("x%02d_%02d", (i + 1), (j + 1)));
       }
     }
 
-    for (int i = 0; i < u.length; i++) {
-      u[i] = modello.addVar(1, dati.N - 1, 0, GRB.INTEGER, String.format("u%02d", (i +
-          1)));
+    for (int i = 0; i < u.length - 1; i++) {
+      u[i] = modello.addVar(1, dati.N - 1, 0, GRB.INTEGER, String.format("u%02d", (i + 1)));
     }
 
-    w = modello.addVar(0.0, GRB.INFINITY, 0, GRB.BINARY, String.format("w"));
+    verticiEF = modello.addVar(0.0, GRB.INFINITY, 0, GRB.BINARY, "verticiEF");
 
-    k = modello.addVar(0.0, GRB.INFINITY, 0, GRB.BINARY, String.format("k"));
+    verticiGHI = modello.addVar(0.0, GRB.INFINITY, 0, GRB.INTEGER, "verticiGHI");
 
-    f = modello.addVar(0.0, GRB.INFINITY, 0, GRB.BINARY, String.format("f"));
-
-    temp = modello.addVar(0.0, GRB.INFINITY, 0, GRB.INTEGER,
-        String.format("temp"));
+    costoAggiuntivo = modello.addVar(0.0, GRB.INFINITY, 0, GRB.INTEGER, "costoAggiuntivo");
   }
 
   private static void impostaFunzioneObiettivoAggiuntiva() throws GRBException {
@@ -160,114 +143,97 @@ public class AppProva {
     for (int i = 0; i < x.length; i++) {
       for (int j = 0; j < x[0].length; j++) {
         if (i != j)
-          funzioneObiettivo.addTerm(dati.graph[i][j], x[i][j]);
+          funzioneObiettivo.addTerm(dati.costi[i][j], x[i][j]);
       }
     }
 
-    funzioneObiettivo.addTerm(1, k);
+    funzioneObiettivo.addTerm(1, verticiGHI);
 
     modello.setObjective(funzioneObiettivo, GRB.MINIMIZE); // Imposto come funzione obiettivo del modello l'espressione
     // lineare creata dicendo che voglio minimizzarla
   }
 
   private static void impostaVincoliAggiuntivi() throws GRBException {
+    // VincoloA -- Inizio
     GRBLinExpr vincoloA = new GRBLinExpr();
 
     for (int i = 0; i < x.length; i++) {
       if (i != dati.v)
-        vincoloA.addTerm(dati.graph[i][dati.v], x[i][dati.v]);
+        vincoloA.addTerm(dati.costi[i][dati.v], x[i][dati.v]);
     }
 
     for (int j = 0; j < x[0].length; j++) {
       if (j != dati.v)
-        vincoloA.addTerm(dati.graph[dati.v][j], x[dati.v][j]);
+        vincoloA.addTerm(dati.costi[dati.v][j], x[dati.v][j]);
     }
 
     for (int i = 0; i < x.length; i++) {
       for (int j = 0; j < x[0].length; j++) {
         if (i != j)
-          vincoloA.addTerm(-dati.graph[i][j] * ((double) dati.a / 100), x[i][j]);
+          vincoloA.addTerm(-dati.costi[i][j] * ((double) dati.a / 100), x[i][j]);
       }
     }
+    modello.addConstr(vincoloA, GRB.LESS_EQUAL, 0, "VincoloMinore_a%");
+    // VincoloA -- Fine
 
-    modello.addConstr(vincoloA, GRB.LESS_EQUAL, 0, "VincoloMinoreA%");
-
+    // VincoloB -- Inizio
     GRBLinExpr vincoloB = new GRBLinExpr();
-    vincoloB.addTerm(1, w);
-    modello.addConstr(vincoloB, GRB.LESS_EQUAL, dati.c, "VincoloB");
 
-    vincoloB = new GRBLinExpr();
-    vincoloB.addTerm(1, w);
-    modello.addConstr(vincoloB, GRB.LESS_EQUAL, x[dati.b1b2[0]][dati.b1b2[1]],
-        "VincoloB_00");
-
-    vincoloB = new GRBLinExpr();
-    vincoloB.addTerm(1, w);
+    vincoloB.addTerm(dati.N * dati.N, x[dati.b1b2[0]][dati.b1b2[1]]);
+    vincoloB.addTerm(-dati.c, x[dati.b1b2[0]][dati.b1b2[1]]);
     for (int i = 0; i < x.length; i++) {
       for (int j = 0; j < x[0].length; j++) {
         if (i != j)
-          vincoloB.addTerm(-dati.graph[i][j], x[i][j]);
+          vincoloB.addTerm(dati.costi[i][j], x[i][j]);
       }
     }
-    modello.addConstr(vincoloB, GRB.LESS_EQUAL, 0, "VincoloB_01");
+    modello.addConstr(vincoloB, GRB.LESS_EQUAL, dati.N * dati.N, "VincoloB");
+    // VincoloB -- Fine
 
-    vincoloB = new GRBLinExpr();
-    vincoloB.addTerm(1, w);
-    vincoloB.addTerm(-1, x[dati.b1b2[0]][dati.b1b2[1]]);
-    for (int i = 0; i < x.length; i++) {
-      for (int j = 0; j < x[0].length; j++) {
-        if (i != j)
-          vincoloB.addTerm(-dati.graph[i][j], x[i][j]);
-      }
-    }
-    modello.addConstr(vincoloB, GRB.GREATER_EQUAL, -dati.N * dati.N, "VincoloB_02");
-
+    // VincoloC -- Inizio
     GRBLinExpr vincoloC = new GRBLinExpr();
-    vincoloC.addTerm(1, f);
-    modello.addConstr(vincoloC, GRB.GREATER_EQUAL, x[dati.d1d2[0]][dati.d1d2[1]],
-        "VincoloC");
+    vincoloC.addTerm(1, verticiEF);
+    modello.addConstr(vincoloC, GRB.GREATER_EQUAL, x[dati.d1d2[0]][dati.d1d2[1]], "VincoloC_00");
 
     vincoloC = new GRBLinExpr();
-    vincoloC.addTerm(1, f);
-    modello.addConstr(vincoloC, GRB.LESS_EQUAL, x[dati.e1e2[0]][dati.e1e2[1]],
-        "VincoloC_00");
+    vincoloC.addTerm(1, verticiEF);
+    modello.addConstr(vincoloC, GRB.LESS_EQUAL, x[dati.e1e2[0]][dati.e1e2[1]], "VincoloC_01");
 
     vincoloC = new GRBLinExpr();
-    vincoloC.addTerm(1, f);
-    modello.addConstr(vincoloC, GRB.LESS_EQUAL, x[dati.f1f2[0]][dati.f1f2[1]],
-        "VincoloC_01");
+    vincoloC.addTerm(1, verticiEF);
+    modello.addConstr(vincoloC, GRB.LESS_EQUAL, x[dati.f1f2[0]][dati.f1f2[1]], "VincoloC_02");
 
     vincoloC = new GRBLinExpr();
-    vincoloC.addTerm(1, f);
+    vincoloC.addTerm(1, verticiEF);
     vincoloC.addTerm(-1, x[dati.e1e2[0]][dati.e1e2[1]]);
     vincoloC.addTerm(-1, x[dati.f1f2[0]][dati.f1f2[1]]);
-    modello.addConstr(vincoloC, GRB.GREATER_EQUAL, -1, "VincoloC_02");
+    modello.addConstr(vincoloC, GRB.GREATER_EQUAL, -1, "VincoloC_03");
+    // VincoloC -- Fine
 
+    // VincoloD -- Inizio
     GRBLinExpr vincoloD = new GRBLinExpr();
-    vincoloD.addTerm(dati.l, k);
-    modello.addConstr(vincoloD, GRB.EQUAL, temp, "VincoloD");
+    vincoloD.addTerm(dati.l, verticiGHI);
+    modello.addConstr(vincoloD, GRB.EQUAL, costoAggiuntivo, "VincoloD_00");
 
     vincoloD = new GRBLinExpr();
-    vincoloD.addTerm(1, k);
-    modello.addConstr(vincoloD, GRB.LESS_EQUAL, x[dati.g1g2[0]][dati.g1g2[1]],
-        "VincoloD_00");
+    vincoloD.addTerm(1, verticiGHI);
+    modello.addConstr(vincoloD, GRB.LESS_EQUAL, x[dati.g1g2[0]][dati.g1g2[1]], "VincoloD_01");
 
     vincoloD = new GRBLinExpr();
-    vincoloD.addTerm(1, k);
-    modello.addConstr(vincoloD, GRB.LESS_EQUAL, x[dati.h1h2[0]][dati.h1h2[1]],
-        "VincoloD_01");
+    vincoloD.addTerm(1, verticiGHI);
+    modello.addConstr(vincoloD, GRB.LESS_EQUAL, x[dati.h1h2[0]][dati.h1h2[1]], "VincoloD_02");
 
     vincoloD = new GRBLinExpr();
-    vincoloD.addTerm(1, k);
-    modello.addConstr(vincoloD, GRB.LESS_EQUAL, x[dati.i1i2[0]][dati.i1i2[1]],
-        "VincoloD_02");
+    vincoloD.addTerm(1, verticiGHI);
+    modello.addConstr(vincoloD, GRB.LESS_EQUAL, x[dati.i1i2[0]][dati.i1i2[1]], "VincoloD_03");
 
     vincoloD = new GRBLinExpr();
-    vincoloD.addTerm(1, k);
+    vincoloD.addTerm(1, verticiGHI);
     vincoloD.addTerm(-1, x[dati.g1g2[0]][dati.g1g2[1]]);
     vincoloD.addTerm(-1, x[dati.h1h2[0]][dati.h1h2[1]]);
     vincoloD.addTerm(-1, x[dati.i1i2[0]][dati.i1i2[1]]);
-    modello.addConstr(vincoloD, GRB.GREATER_EQUAL, -2, "VincoloD_03");
+    modello.addConstr(vincoloD, GRB.GREATER_EQUAL, -2, "VincoloD_04");
+    // VincoloD -- Fine
   }
 
   private static void inizializzaMatricePercorsoOttimo() throws GRBException {
@@ -346,6 +312,7 @@ public class AppProva {
       percorsoOttimo(0, percorsoOttimo);
 
       System.out.println("\nQUESITO II:");
+      System.out.println(String.format("funzione obbiettivo = %.2f", modello.get(GRB.DoubleAttr.ObjVal)));
       System.out.println("ciclo ottimo 2 = " + percorsoOttimo);
       // QUESITO II - Fine
 

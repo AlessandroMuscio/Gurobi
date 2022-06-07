@@ -11,7 +11,7 @@ public class InputData {
   public int[] h1h2;
   public int[] i1i2;
   public int l;
-  public int[][] graph;
+  public int[][] costi;
 
   @Override
   public String toString() {
@@ -30,14 +30,14 @@ public class InputData {
     out.append(String.format("l = %d\n", l));
 
     out.append("\nGrafo\n");
-    for (int i = 0; i < graph.length; i++) {
+    for (int i = 0; i < costi.length; i++) {
       StringBuffer line = new StringBuffer();
 
-      for (int j = 0; j < graph[i].length; j++)
-        if (j != (graph[i].length - 1))
-          line.append(String.format("%d\t", graph[i][j]));
+      for (int j = 0; j < costi[i].length; j++)
+        if (j != (costi[i].length - 1))
+          line.append(String.format("%d\t", costi[i][j]));
         else
-          line.append(String.format("%d", graph[i][j]));
+          line.append(String.format("%d", costi[i][j]));
 
       line.append("\n");
       out.append(line);

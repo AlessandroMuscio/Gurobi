@@ -42,7 +42,7 @@ public class Reader {
 
       if (line != null) {
 
-        if (inputData.graph == null) {
+        if (inputData.costi == null) {
           for (int i = 0; i < findCharRegex.length; i++) {
             pattern = Pattern.compile(findCharRegex[i]);
             matcher = pattern.matcher(line);
@@ -140,7 +140,7 @@ public class Reader {
                   tmp = line.replaceAll(removeCharRegex, "");
                   dim = Integer.parseInt(tmp);
                   inputData.N = dim;
-                  inputData.graph = new int[dim][dim];
+                  inputData.costi = new int[dim][dim];
                   break;
               }
 
@@ -153,8 +153,8 @@ public class Reader {
           int col = Integer.parseInt(rowColVal[1]);
           int val = Integer.parseInt(rowColVal[2]);
 
-          inputData.graph[row][col] = val;
-          inputData.graph[col][row] = val;
+          inputData.costi[row][col] = val;
+          inputData.costi[col][row] = val;
         }
       } else {
         eof = true;
