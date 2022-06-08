@@ -3,7 +3,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[italian]{babel}
 \usepackage[T1]{fontenc}
-\usepackage[a4paper,total={180mm, 267mm},left=14mm,top=10mm]{geometry}
+\usepackage[a4paper,total={180mm, 267mm},left=14mm,top=25mm]{geometry}
 \usepackage{amsfonts, amssymb, fancyhdr}
 \usepackage{amsmath}
 
@@ -47,34 +47,39 @@ Abbiamo quindi utilizzato il valore del parametro `\textit{PoolObjVal}' per conf
 Abbiamo deciso di inserire un controllo per verificare la corrispondenza tra i costi, in questo modo è possibile sfruttare altri set di dati ottenendo risultati coerenti.
 
 \section*{Quesito III}
-Da un'osservazione preliminare risultano necessari i seguenti vincoli in forma lineare:
+Risultano necessari i seguenti vincoli non lineari:
 \begin{gather*}
-	(a)\qquad \sum_{i\neq v,i=1}^n\; costi_{[i][v]}x_{[i][v]}+\sum_{j\neq v,j=1}^n\; costi_{[v][j]}x_{[v][j]}-\frac{a}{100}\left(\sum_{i=1}^n \sum_{i\neq j,j=1}^n\; costi_{[i][j]}x_{[i][j]}\right)\leq 0;\\
-	(b)\qquad n\cdot n\cdot x_{[b1][b2]}-c\cdot x_{[b1][b2]}+\sum_{i=1}^n \sum_{i\neq j,j=1}^n\;costi_{[i][j]}x_{[i][j]}\leq n\cdot n;\\
-	(c)\qquad x_{[e1][e2]}\cdot x_{[f1][f2]}\geq x_{[d1][d2]};\\
+	(b)\qquad n\cdot n\cdot x_{[b1][b2]}-c\cdot x_{[b1][b2]}+\sum_{i=1}^n \sum_{i\neq j,j=1}^n\;costi_{[i][j]}x_{[i][j]}\leq n\cdot n;\\\\
+	(c)\qquad x_{[e1][e2]}\cdot x_{[f1][f2]}\geq x_{[d1][d2]};\\\\
 	(d)\qquad \left(x_{[g1][g2]}\cdot x_{[h1][h2]}\cdot x_{[i1][i2]}\right)\cdot l=\text{costoAggiuntivo}
 \end{gather*}
 
-Trasformandoli in forma non lineare, il modello modificato diventa:
+Trasformando in forma lineare, il modello diventa:
 \begin{gather*}
 	\min\sum_{i=1}^n \sum_{i\neq j,j=1}^n\; costi_{[i][j]}x_{[i][j]}+\text{costoAggiuntivo}\\
-	(a)\qquad \sum_{i\neq v,i=1}^n\; costi_{[i][v]}x_{[i][v]}+\sum_{j\neq v,j=1}^n\; costi_{[v][j]}x_{[v][j]}-\frac{a}{100}\left(\sum_{i=1}^n \sum_{i\neq j,j=1}^n\; costi_{[i][j]}x_{[i][j]}\right)\leq 0;\\
-	(b)\qquad Mx_{[b1][b2]}-c\cdot x_{[b1][b2]}+\sum_{i=1}^n \sum_{i\neq j,j=1}^n\;costi_{[i][j]}x_{[i][j]}\leq M;\\
+	\sum_{i=1,i\neq j}^n x_{ij}=1\qquad j=1,\dots,n;\\
+	\sum_{j=1,j\neq i}^n x_{ij}=1\qquad i=1,\dots,n;\\
+	1\leq u_i\leq n-1\qquad 2\leq i\leq n;\\
+	u_i-u_j+(n-1)x_{ij}\leq n-2\qquad 2\leq i\neq j\leq n;\\\\
+	(a)\qquad \sum_{i\neq v,i=1}^n\; costi_{[i][v]}x_{[i][v]}+\sum_{j\neq v,j=1}^n\; costi_{[v][j]}x_{[v][j]}-\frac{a}{100}\left(\sum_{i=1}^n \sum_{i\neq j,j=1}^n\; costi_{[i][j]}x_{[i][j]}\right)\leq 0;\\\\
+	(b)\qquad Mx_{[b1][b2]}-c\cdot x_{[b1][b2]}+\sum_{i=1}^n \sum_{i\neq j,j=1}^n\;costi_{[i][j]}x_{[i][j]}\leq M;\\\\
 	(c)\qquad p\geq x_{[d1][d2]};\\
 	\qquad p\leq x_{[e1][e2]};\\
 	\qquad p\leq x_{[f1][f2]};\\
-	\qquad p-x_{[e1][e2]}-x_{[f1][f2]}\geq -1;\\
+	\qquad p-x_{[e1][e2]}-x_{[f1][f2]}\geq -1;\\\\
 	(d)\qquad q\cdot l=\text{costoAggiuntivo};\\
 	\qquad q\leq x_{[g1][g2]};\\
 	\qquad q\leq x_{[h1][h2]};\\
 	\qquad q\leq x_{[i1][i2]};\\
 	\qquad q-x_{[g1][g2]}-x_{[h1][h2]}-x_{[i1][i2]}\geq -2.\\\\
+	u_i\in\mathbb{Z}\qquad i=2,\dots,n;\\
+	x_{ij}\in\{0,1\}\qquad i,j=1,\dots,n;\\
 	f,q\in \{0,1\}.
 \end{gather*}\bigskip
 
 \textbf{Note}:
 \begin{enumerate}
-	\item Abbiamo inserito gli indici all'interno delle quadre [] in modo da facilitarne la lettura;
-	\item Utilizziamo $M$ per indicare un valore molto grande che nel nostro modello corrisponde ad $n\cdot n$.
+	\item Nella risposta del terzo quesito abbiamo inserito gli indici all'interno delle quadre $[\;]$ in modo da facilitarne la lettura;
+	\item Utilizziamo $M$ per indicare un valore grande, per il nostro modello scegliamo: $M=n\cdot n$.
 \end{enumerate}
 \end{document}
