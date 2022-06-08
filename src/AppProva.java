@@ -136,8 +136,7 @@ public class AppProva {
   }
 
   private static void impostaFunzioneObiettivoAggiuntiva() throws GRBException {
-    // Creo un'espressione lineare che andrà a rappresentare la mia funzione
-    // obiettivo
+    // Creo un'espressione lineare che andrà a rappresentare la mia funzione obiettivo
     GRBLinExpr funzioneObiettivo = new GRBLinExpr();
 
     for (int i = 0; i < x.length; i++) {
@@ -149,8 +148,7 @@ public class AppProva {
 
     funzioneObiettivo.addTerm(1, verticiGHI);
 
-    modello.setObjective(funzioneObiettivo, GRB.MINIMIZE); // Imposto come funzione obiettivo del modello l'espressione
-    // lineare creata dicendo che voglio minimizzarla
+    modello.setObjective(funzioneObiettivo, GRB.MINIMIZE); // Imposto come funzione obiettivo del modello l'espressione lineare creata dicendo che voglio minimizzarla
   }
 
   private static void impostaVincoliAggiuntivi() throws GRBException {
@@ -305,7 +303,7 @@ public class AppProva {
       modello.update();
       modello.optimize();
 
-      if( costo == (int) modello.get(GRB.DoubleAttr.PoolObjVal) ){
+      if (costo == (int) modello.get(GRB.DoubleAttr.PoolObjVal)) {
 
         inizializzaMatricePercorsoOttimo();
 
@@ -315,8 +313,7 @@ public class AppProva {
 
         System.out.println("\nQUESITO II:");
         System.out.println("ciclo ottimo 2 = " + percorsoOttimo);
-      }
-      else{
+      } else {
         System.out.println("\nQUESITO II:");
         System.out.println("ciclo ottimo 2 = [Non esiste un ulteriore ciclo ottimo a costo uguale]");
       }
