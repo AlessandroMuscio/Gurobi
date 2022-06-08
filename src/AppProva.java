@@ -7,29 +7,50 @@ public class AppProva {
 
   private static Reader reader;
   private static InputData dati;
+
   /**
    * Variabile che rappresenta l'ambiente in cui definire il modello'
    */
   private static GRBEnv ambiente;
+
   /**
    * Variabile che rappresenta il modello del problema
    */
   private static GRBModel modello;
+
   /**
    * Variabile che rappresenta le incognite del modello
    */
   private static GRBVar[][] x;
 
+  /**
+   * Variabile per rappresentare in modo lineare il quesito 3.c
+   */
   private static GRBVar verticiEF;
+
+  /**
+   * Variabile per rappresentare in modo lineare il quesito 3.d
+   */
   private static GRBVar verticiGHI;
+
+  /**
+   * Variabile necessaria per il quesito 3.d per aumentare il costo totale
+   */
   private static GRBVar costoAggiuntivo;
 
   /**
-   * Variabile che rappresenta le incognite del modello
+   * Variabile per i vincoli MTZ
    */
   private static GRBVar[] u;
 
+  /**
+   * Matrice per la determinazione del percorso ottimo
+   */
   private static int[][] A;
+
+  /**
+   * Lista del percorso ottimo
+   */
   private static LinkedList<Integer> percorsoOttimo = new LinkedList<Integer>();
 
   /**
@@ -72,6 +93,11 @@ public class AppProva {
     modello.setObjective(funzioneObiettivo, GRB.MINIMIZE);
   }
 
+  /**
+   * Metodo che aggiunge al modello i vincoli necessari
+   *
+   * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
+   */
   private static void impostaVincoli() throws GRBException {
     // Vincoli di Uguaglianza -- Inizio
     GRBLinExpr vincoloDiUguaglianza0;
@@ -117,6 +143,11 @@ public class AppProva {
     // Vincoli MTZ -- Fine
   }
 
+  /**
+   * Metodo che aggiunge al modello le variabili per la risoluzione del quesito 3
+   *
+   * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
+   */
   private static void inizializzaVariabiliAggiuntive() throws GRBException {
 
     for (int i = 0; i < x.length; i++) {
@@ -136,6 +167,11 @@ public class AppProva {
     costoAggiuntivo = modello.addVar(0.0, GRB.INFINITY, 0, GRB.INTEGER, "costoAggiuntivo");
   }
 
+  /**
+   * Metodo che aggiunge al modello la funzione obiettivo per la risoluzione del quesito 3
+   *
+   * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
+   */
   private static void impostaFunzioneObiettivoAggiuntiva() throws GRBException {
     // Creo un'espressione lineare che andrà a rappresentare la mia funzione obiettivo
     GRBLinExpr funzioneObiettivo = new GRBLinExpr();
@@ -152,6 +188,11 @@ public class AppProva {
     modello.setObjective(funzioneObiettivo, GRB.MINIMIZE); // Imposto come funzione obiettivo del modello l'espressione lineare creata dicendo che voglio minimizzarla
   }
 
+  /**
+   * Metodo che aggiunge al modello i vincoli per la risoluzione del quesito 3
+   *
+   * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
+   */
   private static void impostaVincoliAggiuntivi() throws GRBException {
     // VincoloA -- Inizio
     GRBLinExpr vincoloA = new GRBLinExpr();
@@ -235,6 +276,11 @@ public class AppProva {
     // VincoloD -- Fine
   }
 
+  /**
+   * Metodo che popola la matrice A contenente i valori per la determinazione del percorso ottimo
+   *
+   * @throws GRBException Eccezione di Gurobi, lanciata quando qualcosa va storto
+   */
   private static void inizializzaMatricePercorsoOttimo() throws GRBException {
     A = new int[dati.N][dati.N];
     double[][] doubleA = modello.get(GRB.DoubleAttr.X, x);
@@ -246,6 +292,12 @@ public class AppProva {
     }
   }
 
+  /**
+   * Metodo per la determinazione del percorso ottimo
+   *
+   * @param col colonna da cui partire
+   * @param percorsoOttimo lista dei nodi attraversati
+   */
   private static void percorsoOttimo(int col, LinkedList<Integer> percorsoOttimo) {
     for (int i = 0; i < dati.N; i++) {
       if (A[i][col] == 1) {
