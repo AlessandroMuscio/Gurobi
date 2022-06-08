@@ -26,13 +26,13 @@
   \section*{Quesito I}
   Segue il modello formulato per il problema assegnatoci:
   \begin{gather*}
-    \min\sum_{i=1}^n \sum_{i\neq j,j=1}^n\; c_{ij}x_{ij}\\
-    u_i\in\mathbb{Z}\qquad i=2,\dots,n;\\
-    1\leq u_i\leq n-1\qquad 2\leq i\leq n;\\
-    x_{ij}\in\{0,1\}\qquad i,j=1,\dots,n;\\
+    \min\sum_{i=1}^n \sum_{i\neq j,j=1}^n\; costi_{ij}x_{ij}\\
     \sum_{i=1,i\neq j}^n x_{ij}=1\qquad j=1,\dots,n;\\
     \sum_{j=1,j\neq i}^n x_{ij}=1\qquad i=1,\dots,n;\\
-    u_i-u_j+(n-1)x_{ij}\leq n-2\qquad 2\leq i\neq j\leq n.
+    1\leq u_i\leq n-1\qquad 2\leq i\leq n;\\
+    u_i-u_j+(n-1)x_{ij}\leq n-2\qquad 2\leq i\neq j\leq n;\\\\
+    u_i\in\mathbb{Z}\qquad i=2,\dots,n;\\
+    x_{ij}\in\{0,1\}\qquad i,j=1,\dots,n.
   \end{gather*}
 
   \section*{Quesito II}
@@ -42,8 +42,32 @@
     \item `\textit{SolutionNumber}' = 1.
   \end{itemize}
 
-  Abbiamo quindi utilizzato il parametro `\textit{PoolObjVal}' per confrontare il nuovo valore della funzione obiettivo con quello precedentemente determinato nel quesito 1, osservando che, effettivamente, questi risultano essere coincidenti; la nuova soluzione ha quindi medesimo costo e un ciclo ottimo differente.
+  Abbiamo quindi utilizzato il valore del parametro `\textit{PoolObjVal}' per confrontare il valore della nuova funzione obiettivo con quello precedentemente determinato , osservando che, effettivamente, questi risultano essere coincidenti; la nuova soluzione ha quindi medesimo costo e un ciclo ottimo differente.
 
   Abbiamo deciso di inserire un controllo per verificare la corrispondenza tra i costi, in questo modo è possibile sfruttare altri set di dati ottenendo risultati coerenti.
 
+  \newpage
+  \section*{Quesito III}
+  Da un'osservazione preliminare risultano necessari i seguenti vincoli :
+  \begin{gather*}
+    (a)\qquad \sum_{i\neq v,i=1}^n\; costi_{[i][v]}x_{[i][v]}+\sum_{j\neq v,j=1}^n\; costi_{[v][j]}x_{[v][j]}-\frac{a}{100}\left(\sum_{i=1}^n \sum_{i\neq j,j=1}^n\; costi_{[i][j]}x_{[i][j]}\right)\leq 0;\\
+    (b)\qquad n\cdot n\cdot x_{[b1][b2]}-c\cdot x_{[b1][b2]}+\sum_{i=1}^n \sum_{i\neq j,j=1}^n\;costi_{[i][j]}x_{[i][j]}\leq n\cdot n;\\
+    (c)\qquad p\geq x_{[d1][d2]};\\
+    \qquad p\leq x_{[e1][e2]};\\
+    \qquad p\leq x_{[f1][f2]};\\
+    \qquad p-x_{[e1][e2]}-x_{[f1][f2]}\geq -1;\\
+    (d)\qquad q\cdot l=\text{costoAggiuntivo};\\
+    \qquad q\leq x_{[g1][g2]};\\
+    \qquad q\leq x_{[h1][h2]};\\
+    \qquad q\leq x_{[i1][i2]};\\
+    \qquad q-x_{[g1][g2]}-x_{[h1][h2]}-x_{[i1][i2]}\geq -2.\\\\
+    f,q\in \{0,1\}.
+  \end{gather*}
+
+  Inoltre, e stato necessario modificare la funzione obbiettivo in questo modo:
+  \begin{equation*}
+    \min\sum_{i=1}^n \sum_{i\neq j,j=1}^n\; costi_{[i][j]}x_{[i][j]}+\text{costoAggiuntivo}
+  \end{equation*}\bigskip
+
+  \textbf{Nota}: Abbiamo inserito gli indici all'interno delle quadre [] in modo da facilitarne la lettura.
 \end{document}
