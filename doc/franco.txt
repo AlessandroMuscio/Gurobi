@@ -1,8 +1,0 @@
-Quesito 2:
-Per verificare la presenza di ulteriori soluzioni ottime, con costo uguale a quella precedentemente determinata, abbiamo impostato i seguenti parametri del modello:
-- PoolSearchMode = 2
-- SolutionNumber = 1
-
-Abbiamo quindi utilizzato il parametro PoolObjVal per confrontare il nuovo valore della funzione obiettivo con quello precedentemente determinato nel quesito 1,
-osservando che, effettivamente, questi risultano essere coincidenti; la nuova soluzione ha quindi medesimo costo e un ciclo ottimo differente.
-Abbiamo deciso di inserire un controllo per verificare la corrispondenza tra i costi, in questo modo è possibile sfruttare altri set di dati ottenendo risultati coerenti.

@@ -1,36 +1,23 @@
-% Il documento è un article, LaTeX ha delle classi standard che impostano già dei parametri per te, in più gli ho aumentato la grandezza al font così arriviamo prima ad una pagina ;)
 \documentclass[12pt]{article}
 
-% Imposto la codifica del file ad UTF-8
 \usepackage[utf8]{inputenc}
-% Imposto la lingua in italiano
 \usepackage[italian]{babel}
-% Questo ho capito che imposta la codifica del font ma non so cosa sia T1
 \usepackage[T1]{fontenc}
-% Imposto il formato, dimensioni totali, margini 
 \usepackage[a4paper,total={180mm, 267mm},left=14mm,top=10mm]{geometry}
-% I prime tre pacchetti ti fanno fare tutte le equazione super belle con i simboli belli, il 4° vedi dopo
 \usepackage{amsfonts, amssymb, fancyhdr}
 \usepackage{amsmath}
 
-% Le impostazioni di indentazione di default di LaTeX sono strane, questo le rimuove
 \setlength{\parindent}{0pt}
 
-% Queste 7 righe sono possibili grazie al famoso 4° pacchetto, LaTeX di default mi mette delle barre nere a inizio e a pie di pagina inoltre a mettere il numero di pagina dopo la riga nera a pie di pagina in centro. Con questo rimuovo le linee nere e metto il numero di pagina in basso a destra
 \pagestyle{fancy}
 \fancyhead{}
 \fancyfoot{}
-%\fancyfoot[R]{\thepage}
 
 \renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{0pt}
 
-% LaTeX funziona ad "ambienti", quello principale è il document, dove ci mettiamo il contenuto del file, tutto quello che c'è prima è solo il preambolo e serve ad impostare vari parametri
 \begin{document}
-  % Creò un ambiente che centra il suo contenuto
   \begin{center}
-    % \Large o \small aumentano il font di quell che viene dopo, \textbf{} è il grassetto.
-    % In LaTeX per andare a capo bisogna lasciare una linea vuota, oppure inserire \\ a fine riga
     \Large\textbf{Relazione Progetto Gurobi - Parte Seconda}
 
     \small Coppia N° 81: Brignoli Muscio
