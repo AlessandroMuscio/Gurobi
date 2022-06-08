@@ -110,7 +110,7 @@ public class AppProva {
           vincoliMTZ.addTerm(-1, u[j - 1]);
           vincoliMTZ.addTerm((dati.N - 1), x[i][j]);
 
-          modello.addConstr(vincoliMTZ, GRB.LESS_EQUAL, dati.N - 2, "Vincolo_di_stocazzo_" + i + "_" + j);
+          modello.addConstr(vincoliMTZ, GRB.LESS_EQUAL, dati.N - 2, "vincolo_MTZ" + i + "_" + j);
         }
       }
     }
@@ -118,6 +118,7 @@ public class AppProva {
   }
 
   private static void inizializzaVariabiliAggiuntive() throws GRBException {
+
     for (int i = 0; i < x.length; i++) {
       for (int j = 0; j < x[0].length; j++) {
         x[i][j] = modello.addVar(0.0, GRB.INFINITY, 0, GRB.BINARY, String.format("x%02d_%02d", (i + 1), (j + 1)));
