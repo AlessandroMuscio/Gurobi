@@ -5,11 +5,18 @@ import java.util.LinkedList;
 
 public class AppProva {
 
+  /**
+   * Variabile che rappresenta il reader per leggere da file
+   */
   private static Reader reader;
+
+  /**
+   * Variabile in cui sono disponibili i dati formattati
+   */
   private static InputData dati;
 
   /**
-   * Variabile che rappresenta l'ambiente in cui definire il modello'
+   * Variabile che rappresenta l'ambiente in cui definire il modello
    */
   private static GRBEnv ambiente;
 
