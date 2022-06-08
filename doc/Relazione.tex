@@ -8,7 +8,7 @@
 % Questo ho capito che imposta la codifica del font ma non so cosa sia T1
 \usepackage[T1]{fontenc}
 % Imposto il formato, dimensioni totali, margini 
-\usepackage[a4paper,total={180mm, 267mm},left=14mm,top=20mm]{geometry}
+\usepackage[a4paper,total={180mm, 267mm},left=14mm,top=10mm]{geometry}
 % I prime tre pacchetti ti fanno fare tutte le equazione super belle con i simboli belli, il 4° vedi dopo
 \usepackage{amsfonts, amssymb, fancyhdr}
 \usepackage{amsmath}
@@ -31,34 +31,32 @@
   \begin{center}
     % \Large o \small aumentano il font di quell che viene dopo, \textbf{} è il grassetto.
     % In LaTeX per andare a capo bisogna lasciare una linea vuota, oppure inserire \\ a fine riga
-    \Large\textbf{Relazione Progetto Gurobi - Parte Prima}
+    \Large\textbf{Relazione Progetto Gurobi - Parte Seconda}
 
     \small Coppia N° 81: Brignoli Muscio
-  \end{center}\bigskip
+  \end{center}
 
+  \section*{Quesito I}
   Segue il modello formulato per il problema assegnatoci:
   \begin{gather*}
-    min\quad a \\
-    \sum_{j=1}^{\frac{K}{2}}\sum_{i=1}^{M}P_{ij}\,x_{ij}-\sum_{j=\frac{K}{2}+1}^{K}\sum_{i=1}^{M}P_{ij}\,x_{ij}\leq a \\
-    -\sum_{j=1}^{\frac{K}{2}}\sum_{i=1}^{M}P_{ij}\,x_{ij}+\sum_{j=\frac{K}{2}+1}^{K}\sum_{i=1}^{M}P_{ij}\,x_{ij}\leq a \\
-    \sum_{i=1}^M C_{ij}\,x_{ij}\geq \Omega\,\sum_{i=1}^M\beta_i \\
-    \sum_{j=1}^{K}\sum_{i=1}^{M} P_{ij}\,x_{ij}\geq S \\
-    \sum_{j=1}^K C_{ij}\,x_{ij}\leq \beta_i \\
-    x_{ij}\leq \tau_{ij} \\
-    x_{ij}\geq 0
+    \min\sum_{i=1}^n \sum_{i\neq j,j=1}^n\; c_{ij}x_{ij}\\
+    u_i\in\mathbb{Z}\qquad i=2,\dots,n;\\
+    1\leq u_i\leq n-1\qquad 2\leq i\leq n;\\
+    x_{ij}\in\{0,1\}\qquad i,j=1,\dots,n;\\
+    \sum_{i=1,i\neq j}^n x_{ij}=1\qquad j=1,\dots,n;\\
+    \sum_{j=1,j\neq i}^n x_{ij}=1\qquad i=1,\dots,n;\\
+    u_i-u_j+(n-1)x_{ij}\leq n-2\qquad 2\leq i\neq j\leq n.
   \end{gather*}
-  \hfill$\forall i,\:j\in\mathbb{N}:1\leq i\leq M\wedge1\leq j\leq K$
 
-  \section*{Spiegazioni Quesito III}
-  {\Large\bfseries Procedura 1}\\
-  Come prima procedura per trovare una soluzione non ottima ammissibile al problema abbiamo preso uno dei vertici ottimi trovati e abbiamo determinando così un vettore $\boldsymbol{\lambda}$ di $q$ valori tale che \\ 
-  $\boldsymbol{\lambda}={\displaystyle\sum_{i=1}^q}\lambda_i=1$ in modo da poterli così utilizzare in una \textbf{combinazione convessa} di questo vertice.\bigskip\bigskip
-  
-  {\Large\bfseries Procedura 2}\\
-  Come seconda procedura abbiamo sfruttato il problema risolto in \textbf{forma standard} per poi valorizzare una delle slack di uno dei vincoli che identificano il vertice ottimo ad un valore non nullo maggiore di zero.\\
-  Nel nostro caso specifico abbiamo scelto di valorizzare $s_3$, variabile di slack associata al primo vincolo di costo, a $100$.\bigskip\bigskip
+  \section*{Quesito II}
+  Per verificare la presenza di ulteriori soluzioni ottime, con costo uguale a quella precedentemente determinata, abbiamo impostato i seguenti parametri del modello:
+  \begin{itemize}
+    \item `\textit{PoolSearchMode}' = 2;
+    \item `\textit{SolutionNumber}' = 1.
+  \end{itemize}
 
-  {\Large\bfseries Procedura 3}\\
-  Come terza ed ultima procedura per trovare una soluzione non ottima ammissibile al problema abbiamo deciso di risolverlo utilizzando il metodo delle \textbf{due fasi} fermandoci, però, alla fase uno.\\
-  In questo modo abbiamo ottenuto un punto da cui partire per risolverle il problema utilizzando il simplesso cioè una soluzione ammissibile non ottima.
+  Abbiamo quindi utilizzato il parametro `\textit{PoolObjVal}' per confrontare il nuovo valore della funzione obiettivo con quello precedentemente determinato nel quesito 1, osservando che, effettivamente, questi risultano essere coincidenti; la nuova soluzione ha quindi medesimo costo e un ciclo ottimo differente.
+
+  Abbiamo deciso di inserire un controllo per verificare la corrispondenza tra i costi, in questo modo è possibile sfruttare altri set di dati ottenendo risultati coerenti.
+
 \end{document}
