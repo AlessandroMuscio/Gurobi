@@ -1,3 +1,6 @@
+/**
+ * La classe InputData mi permette di avere tutti i dati dell'input in un singolo punto sempre accessibili.
+ */
 public class InputData {
   public int N;
   public int v;

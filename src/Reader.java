@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * La classe Reader mi permette di leggere il file dove sono contenuti i dati d'input.
+ */
 public class Reader {
   private static FileReader fr;
   private static BufferedReader br;
@@ -14,6 +17,9 @@ public class Reader {
     br = new BufferedReader(fr);
   }
 
+  /**
+   * Mi permette di leggere il file in input utilizzando delle Regex per inizializzare un oggetto della classe InputData
+   */
   public InputData readFile() throws IOException {
     InputData inputData = new InputData();
     String line;
